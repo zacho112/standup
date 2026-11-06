@@ -30,7 +30,7 @@ jobs:
       - run: npm run build
         env:
           VITE_RELAY_URL: ${{ vars.RELAY_URL }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - id: deployment
