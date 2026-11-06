@@ -915,10 +915,10 @@ input[type="checkbox"] {
   display: inline-block;
 }
 .kitten.walk .sprite {
-  animation: trot 0.45s ease-in-out infinite;
+  animation: trot 0.7s ease-in-out infinite;
 }
 .kitten.walk.zoomies .sprite {
-  animation-duration: 0.15s;
+  animation-duration: 0.25s;
 }
 .kitten.nap .sprite {
   filter: saturate(0.6);
@@ -949,7 +949,9 @@ input[type="checkbox"] {
   color: var(--text);
   font-size: 0.85rem;
   font-weight: 700;
-  white-space: nowrap;
+  width: max-content;
+  max-width: 220px;
+  text-align: center;
 }
 .kitten .zzz {
   position: absolute;

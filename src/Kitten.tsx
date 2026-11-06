@@ -4,9 +4,29 @@ import { currentSpeaker, elapsedMs, type Timer } from "./state";
 type Mode = "walk" | "sit" | "nap";
 
 const MEOWS = ["meow!", "mrrp?", "purrr…", "=^.^=", "mew", "feed me"];
+const RARE_CHANCE = 0.15;
+const RARE = [
+  "this could've been an email",
+  "my update: slept. blockers: none.",
+  "any blockers? yes. the door.",
+  "let's circle back after my nap",
+  "LGTM 👍 (didn't read it)",
+  "I parked something on your keyboard",
+  "works on my machine 😼",
+  "git push --force 😼",
+  "can we take this offline? I'm going outside",
+  "I knocked your coffee off the desk. you're welcome.",
+  "is it lunch yet?",
+  "who approved this PR? me. I sat on the keyboard.",
+  "I'd like to add a topic: more treats",
+  "time-box exceeded. *knocks timer off table*",
+];
+const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)];
 const SIZE = 40;
+const QUIET_MS = 2500;
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const readMs = (text: string) => 1500 + text.length * 70;
 
 // A kitten that wanders along the bottom of the screen, kicks yarn, naps, and gets zoomies on overtime.
 export function Kitten({ timer }: { timer: Timer }) {
@@ -15,7 +35,7 @@ export function Kitten({ timer }: { timer: Timer }) {
   const facingRef = useRef<HTMLSpanElement>(null);
   const yarnRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef(timer);
-  const sim = useRef({ x: 40, target: 300, mode: "walk" as Mode, until: 0, yarnX: 0, yarnSpin: 0, zoomies: false, last: 0, raf: 0 });
+  const sim = useRef({ x: 40, target: 300, mode: "walk" as Mode, until: 0, yarnX: 0, yarnSpin: 0, zoomies: false, last: 0, raf: 0, quietUntil: 0 });
   const [mode, setMode] = useState<Mode>("walk");
   const [bubble, setBubble] = useState<string | null>(null);
   const [jumping, setJumping] = useState(false);
@@ -26,9 +46,17 @@ export function Kitten({ timer }: { timer: Timer }) {
 
   useEffect(() => {
     if (!bubble) return;
-    const id = setTimeout(() => setBubble(null), 1600);
+    const id = setTimeout(() => setBubble(null), readMs(bubble));
     return () => clearTimeout(id);
   }, [bubble]);
+
+  // Stays quiet until the current line has been read, plus a short pause.
+  const say = (text: string) => {
+    const now = performance.now();
+    if (now < sim.current.quietUntil) return;
+    sim.current.quietUntil = now + readMs(text) + QUIET_MS;
+    setBubble(text);
+  };
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -54,7 +82,8 @@ export function Kitten({ timer }: { timer: Timer }) {
       const zoomies = currentSpeaker(t) !== null && elapsedMs(t, Date.now()) > t.secondsPerPerson * 1000;
       if (zoomies && !s.zoomies) {
         switchMode("walk", 0);
-        setBubble("ZOOMIES!");
+        s.quietUntil = 0;
+        say("ZOOMIES!");
       }
       s.zoomies = zoomies;
       catRef.current?.classList.toggle("zoomies", zoomies);
@@ -63,7 +92,7 @@ export function Kitten({ timer }: { timer: Timer }) {
         if (now > s.until) switchMode("walk", 0);
       } else {
         const dx = s.target - s.x;
-        const speed = zoomies ? 340 : 70;
+        const speed = zoomies ? 170 : 35;
         s.x = clamp(s.x + Math.sign(dx) * Math.min(Math.abs(dx), speed * dt), 0, maxX);
         if (facingRef.current && Math.abs(dx) > 1) facingRef.current.style.transform = dx > 0 ? "scaleX(-1)" : "";
 
@@ -93,7 +122,7 @@ export function Kitten({ timer }: { timer: Timer }) {
 
   const pet = () => {
     if (sim.current.mode === "nap") sim.current.until = 0;
-    setBubble(MEOWS[Math.floor(Math.random() * MEOWS.length)]);
+    say(Math.random() < RARE_CHANCE ? pick(RARE) : pick(MEOWS));
     setJumping(true);
   };
 
