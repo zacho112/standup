@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { asciiDigits } from "./asciiDigits";
 import { usePrefs } from "./prefs";
 import { currentSpeaker, elapsedMs, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, timerPressure, toggleTimer } from "./state";
 import type { RoomApi } from "./useRoom";
@@ -90,7 +91,13 @@ export function EggTimer({ state, online, update }: RoomApi) {
         <section className="card timer" data-pressure={pressure}>
             <h2>{theme.timer}</h2>
             <div className={`clock ${pressure}`}>
-                <div className="time">{fmt(remaining)}</div>
+                {theme.terminal ? (
+                    <pre className="time ascii" role="img" aria-label={fmt(remaining)}>
+                        {asciiDigits(fmt(remaining))}
+                    </pre>
+                ) : (
+                    <div className="time">{fmt(remaining)}</div>
+                )}
                 {theme.terminal ? (
                     <div className="bar">[{bar(fraction)}]</div>
                 ) : (

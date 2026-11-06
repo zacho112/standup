@@ -779,6 +779,17 @@ input[type="checkbox"] {
         font-size: 4.5rem;
     }
 
+    .clock .time.ascii {
+        margin: 0 auto;
+        width: fit-content;
+        font-family: inherit;
+        font-size: clamp(0.5rem, 2vw, 0.95rem);
+        font-weight: normal;
+        line-height: 1;
+        letter-spacing: 0;
+        text-align: left;
+    }
+
     .clock .bar {
         margin-top: 0.6rem;
         letter-spacing: -0.05em;
@@ -952,6 +963,10 @@ input[type="checkbox"] {
 [data-theme="hacker"][data-crt="on"] {
     .clock .time {
         text-shadow: 0 0 8px currentColor, 0 0 24px color-mix(in srgb, currentColor 40%, transparent);
+    }
+
+    .clock .time.ascii {
+        text-shadow: 0 0 6px color-mix(in srgb, currentColor 70%, transparent);
     }
 
     .host,
