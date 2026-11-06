@@ -30,9 +30,21 @@ export type Timer = {
     updatedAt: number;
 };
 
+export type Deadline = {
+    id: string;
+    title: string;
+    // Calendar date, YYYY-MM-DD.
+    date: string;
+    author: string;
+    createdAt: number;
+    deleted: boolean;
+    updatedAt: number;
+};
+
 export type RoomState = {
     people: Record<string, Person>;
     parking: Record<string, ParkingItem>;
+    deadlines: Record<string, Deadline>;
     timer: Timer;
 };
 
@@ -45,9 +57,13 @@ const RETENTION_MS = ARCHIVE_DAYS * 24 * 60 * 60 * 1000;
 const isExpired = (i: ParkingItem, now: number) =>
     (i.archivedAt !== null && now - i.archivedAt > RETENTION_MS) || (i.deleted && now - i.updatedAt > RETENTION_MS);
 
+const isDeadlineExpired = (d: Deadline, now: number) =>
+    (d.deleted && now - d.updatedAt > RETENTION_MS) || now - Date.parse(d.date) > RETENTION_MS;
+
 export const emptyState = (): RoomState => ({
     people: {},
     parking: {},
+    deadlines: {},
     timer: { order: [], index: -1, secondsPerPerson: 90, startedAt: null, elapsedMs: 0, updatedAt: 0 },
 });
 
@@ -62,6 +78,14 @@ export const isToday = (ts: number) => new Date(ts).toDateString() === new Date(
 export const moodOf = (p: Person) => (p.mood !== null && isToday(p.moodAt) ? p.mood : null);
 
 export const currentSpeaker = (t: Timer) => (t.index >= 0 && t.index < t.order.length ? t.order[t.index] : null);
+
+export type Pressure = "calm" | "warm" | "hot" | "over";
+
+export function timerPressure(t: Timer, now: number): Pressure | null {
+    if (currentSpeaker(t) === null) return null;
+    const left = 1 - elapsedMs(t, now) / (t.secondsPerPerson * 1000);
+    return left <= 0 ? "over" : left < 0.25 ? "hot" : left < 0.5 ? "warm" : "calm";
+}
 
 export const onlineCandidates = (s: RoomState, online: Set<string>) =>
     Object.values(s.people)
@@ -119,6 +143,27 @@ export function addTopic(s: RoomState, text: string, needsLT: boolean, author: s
     return { ...s, parking: { ...s.parking, [item.id]: item } };
 }
 
+export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export function addDeadline(s: RoomState, title: string, date: string, author: string): RoomState {
+    const now = Date.now();
+    const deadline: Deadline = { id: crypto.randomUUID(), title, date, author, createdAt: now, deleted: false, updatedAt: now };
+    return { ...s, deadlines: { ...s.deadlines, [deadline.id]: deadline } };
+}
+
+export function removeDeadline(s: RoomState, id: string): RoomState {
+    const d = s.deadlines[id];
+    return d ? { ...s, deadlines: { ...s.deadlines, [id]: { ...d, deleted: true, updatedAt: stamp(d.updatedAt) } } } : s;
+}
+
+// Whole calendar days from today (local time) to the date; negative once it has passed.
+export function daysUntil(date: string, now = Date.now()): number {
+    const [y, m, d] = date.split("-").map(Number);
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    return Math.round((new Date(y, m - 1, d).getTime() - today.getTime()) / 86_400_000);
+}
+
 // Keeps the team roster and unresolved parking-lot items.
 export function freshStandup(s: RoomState): RoomState {
     const people = Object.fromEntries(
@@ -134,7 +179,7 @@ export function freshStandup(s: RoomState): RoomState {
             ]),
     );
     const timer = { ...s.timer, order: [], index: -1, startedAt: null, elapsedMs: 0, updatedAt: stamp(s.timer.updatedAt) };
-    return { people, parking, timer };
+    return { people, parking, deadlines: s.deadlines, timer };
 }
 
 export function shuffle<T>(items: T[]): T[] {
@@ -165,6 +210,7 @@ export function merge(a: RoomState, b: RoomState): RoomState {
     return {
         people: mergeRecords(a.people, b.people),
         parking: mergeRecords(a.parking, b.parking),
+        deadlines: mergeRecords(a.deadlines, b.deadlines),
         timer: newer(a.timer, b.timer),
     };
 }
@@ -195,6 +241,17 @@ const isParkingItem = (i: unknown): i is ParkingItem =>
     typeof i.deleted === "boolean" &&
     isNum(i.updatedAt);
 
+const isDeadline = (d: unknown): d is Deadline =>
+    isObj(d) &&
+    isStr(d.id) &&
+    isStr(d.title) &&
+    isStr(d.date) &&
+    DATE_RE.test(d.date) &&
+    isStr(d.author) &&
+    isNum(d.createdAt) &&
+    typeof d.deleted === "boolean" &&
+    isNum(d.updatedAt);
+
 const isTimer = (t: unknown): t is Timer =>
     isObj(t) &&
     Array.isArray(t.order) &&
@@ -214,5 +271,9 @@ export function sanitize(x: unknown): RoomState | null {
     if (!isObj(x) || !isTimer(x.timer)) return null;
     const now = Date.now();
     const parking = Object.fromEntries(Object.entries(pick(x.parking, isParkingItem)).filter(([, i]) => !isExpired(i, now)));
-    return { people: pick(x.people, isPerson), parking, timer: x.timer };
+    // Older app versions don't send deadlines; pick() then returns {}.
+    const deadlines = Object.fromEntries(
+        Object.entries(pick(x.deadlines, isDeadline)).filter(([, d]) => !isDeadlineExpired(d, now)),
+    );
+    return { people: pick(x.people, isPerson), parking, deadlines, timer: x.timer };
 }

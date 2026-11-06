@@ -25,6 +25,10 @@ export type Theme = {
     nudgeTopics: string;
     nudgeSkip: string;
     sessionEnded: string;
+    hurry: string;
+    deadlines: string;
+    deadlinesEmpty: string;
+    deadlinePlaceholder: string;
 };
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -52,6 +56,10 @@ export const THEMES: Record<ThemeName, Theme> = {
         nudgeTopics: "step 2/2 → anything to discuss after standup?",
         nudgeSkip: "nothing from me",
         sessionEnded: "connection closed by remote host",
+        hurry: "warning: time slice nearly exhausted",
+        deadlines: "deadlines --watch",
+        deadlinesEmpty: "// no deadlines scheduled",
+        deadlinePlaceholder: "> what's due?",
     },
     default: {
         name: "default",
@@ -77,6 +85,10 @@ export const THEMES: Record<ThemeName, Theme> = {
         nudgeTopics: "👉 Step 2 of 2: any discussion topics?",
         nudgeSkip: "nothing from me",
         sessionEnded: "Session ended",
+        hurry: "Time to wrap up",
+        deadlines: "Deadlines",
+        deadlinesEmpty: "No deadlines yet.",
+        deadlinePlaceholder: "What's due?",
     },
     unicorn: {
         name: "unicorn",
@@ -102,6 +114,10 @@ export const THEMES: Record<ThemeName, Theme> = {
         nudgeTopics: "✨ Step 2 of 2: any magical topics?",
         nudgeSkip: "nothing from me 🦄",
         sessionEnded: "✨ The magic wore off",
+        hurry: "✨ Sprinkle it up! ✨",
+        deadlines: "🌈 Magic dates",
+        deadlinesEmpty: "No magic dates yet ✨",
+        deadlinePlaceholder: "What magic is due?",
     },
     kitten: {
         name: "kitten",
@@ -127,6 +143,10 @@ export const THEMES: Record<ThemeName, Theme> = {
         nudgeTopics: "🐾 Step 2 of 2: anything to paw at?",
         nudgeSkip: "nothing, just napping 😴",
         sessionEnded: "😴 The kitten fell asleep",
+        hurry: "🐾 Paws up, wrap it up!",
+        deadlines: "🐟 Feeding times (deadlines)",
+        deadlinesEmpty: "No feeding times scheduled.",
+        deadlinePlaceholder: "What's due, meow?",
     },
 };
 

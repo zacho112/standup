@@ -15,7 +15,7 @@ export function People({ state, online, update, meId, nudge }: RoomApi & { meId:
     const avg = todays.length ? theme.moods[Math.round(todays.reduce((a, b) => a + b, 0) / todays.length)] : null;
 
     return (
-        <section className="card">
+        <section className="card team">
             <h2>
                 {theme.team} {avg && <span title="Average mood today">{avg}</span>}
             </h2>

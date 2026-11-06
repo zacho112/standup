@@ -49,16 +49,34 @@ header.top h1 {
 .grid {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-areas:
+        "timer people"
+        "timer deadlines"
+        "parking parking";
+    align-items: start;
     gap: 1.25rem;
 }
 
+.timer {
+    grid-area: timer;
+}
+
+.team {
+    grid-area: people;
+}
+
+.deadlines {
+    grid-area: deadlines;
+}
+
 .parking {
-    grid-column: 1 / -1;
+    grid-area: parking;
 }
 
 @media (max-width: 760px) {
     .grid {
         grid-template-columns: 1fr;
+        grid-template-areas: "timer" "people" "deadlines" "parking";
     }
 }
 
@@ -119,6 +137,7 @@ button.icon {
 }
 
 input[type="text"],
+input[type="date"],
 select {
     border: 1px solid var(--border);
     background: var(--bg);
@@ -205,12 +224,20 @@ input[type="checkbox"] {
     font-size: 1.5rem;
 }
 
-.clock.low {
+.clock.warm .progress>div {
+    background: #eab308;
+}
+
+.clock.hot {
     color: var(--amber);
 }
 
-.clock.low .progress>div {
+.clock.hot .progress>div {
     background: var(--amber);
+}
+
+.clock.hot .time {
+    animation: throb 1s ease-in-out infinite;
 }
 
 .clock.over {
@@ -219,6 +246,58 @@ input[type="checkbox"] {
 
 .clock.over .progress>div {
     background: var(--red);
+}
+
+.clock.over .time {
+    animation: shake 2s ease-in-out infinite;
+}
+
+.timer[data-pressure="over"] {
+    border-color: var(--red);
+    animation: alarm 1.2s ease-in-out infinite;
+}
+
+.hurry {
+    margin-top: 0.5rem;
+    font-weight: 700;
+    color: var(--amber);
+}
+
+@keyframes throb {
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+@keyframes shake {
+    0%, 20%, 100% {
+        transform: none;
+    }
+
+    4%, 12% {
+        transform: translateX(-5px);
+    }
+
+    8%, 16% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes alarm {
+    50% {
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--red) 25%, transparent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clock .time,
+    .timer,
+    .hurry,
+    .clock .progress,
+    .clock .progress>div,
+    .clock .progress>div::after {
+        animation: none !important;
+    }
 }
 
 .alert {
@@ -345,6 +424,10 @@ input[type="checkbox"] {
 .add-form input[type="text"] {
     flex: 1;
     min-width: 220px;
+}
+
+.deadlines .add-form input[type="text"] {
+    min-width: 120px;
 }
 
 .check {
@@ -530,7 +613,6 @@ input[type="checkbox"] {
         align-items: baseline;
         gap: 0.5ch;
         flex: 1;
-        min-width: 260px;
     }
 
     .shell h1 {
@@ -542,7 +624,7 @@ input[type="checkbox"] {
 
     header.top .shell input[type="text"] {
         flex: 1;
-        min-width: 8ch;
+        width: 12ch;
         padding: 0;
         border: none;
         font-size: 1.15rem;
@@ -655,6 +737,7 @@ input[type="checkbox"] {
     }
 
     input[type="text"],
+    input[type="date"],
     select {
         border: none;
         border-radius: 0;
@@ -666,6 +749,7 @@ input[type="checkbox"] {
     }
 
     input[type="text"]:focus,
+    input[type="date"]:focus,
     select:focus {
         border-bottom: 1px solid var(--text);
     }
@@ -939,15 +1023,30 @@ input[type="checkbox"] {
         color: transparent;
     }
 
-    .clock.low .time,
+    .clock.hot .time,
     .clock.over .time {
         background: none;
         color: inherit;
     }
 
     .clock .progress>div,
-    .clock.low .progress>div {
-        background: var(--rainbow);
+    .clock.warm .progress>div,
+    .clock.hot .progress>div {
+        background: linear-gradient(90deg, #ff6ec7, #ffb86b, #ffe66d, #7cf29c, #5ec8ff, #a77bff, #ff6ec7);
+        background-size: 200% 100%;
+        animation: rainbow 4s linear infinite;
+    }
+
+    .clock.warm .progress>div {
+        animation-duration: 2s;
+    }
+
+    .clock.hot .progress>div {
+        animation-duration: 0.8s;
+    }
+
+    .clock.hot .progress>div::after {
+        animation: bounce 0.4s ease-in-out infinite;
     }
 
     .wrap,
@@ -1017,6 +1116,15 @@ input[type="checkbox"] {
         animation: wiggle 0.4s ease-in-out infinite;
     }
 
+    .clock.hot .progress {
+        background-size: 17px 17px;
+        animation: stripes 0.6s linear infinite;
+    }
+
+    .clock.hot .progress>div::after {
+        animation: bounce 0.35s ease-in-out infinite;
+    }
+
     .items li {
         border-style: dashed;
         border-width: 2px;
@@ -1040,6 +1148,156 @@ input[type="checkbox"] {
     .alert,
     .clock .progress>div::after {
         animation: none !important;
+    }
+}
+
+@keyframes rainbow {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes bounce {
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes stripes {
+    to {
+        background-position: 17px 0;
+    }
+}
+
+[data-theme="hacker"] .clock.hot .time {
+    animation: glitch 0.9s steps(1) infinite;
+}
+
+[data-theme="hacker"] .hurry {
+    animation: blink 1s steps(1) infinite;
+}
+
+[data-theme="hacker"] .timer[data-pressure="over"] {
+    animation: none;
+    box-shadow: inset 0 0 40px rgba(255, 59, 59, 0.2);
+}
+
+@keyframes glitch {
+    0%, 40%, 100% {
+        transform: none;
+    }
+
+    10% {
+        transform: translateX(-3px);
+        text-shadow: 3px 0 var(--red), -3px 0 var(--lt);
+    }
+
+    20% {
+        transform: translateX(2px) skewX(-8deg);
+    }
+
+    30% {
+        transform: translateX(-1px);
+        text-shadow: -2px 0 var(--red), 2px 0 var(--lt);
+    }
+}
+
+/* Deadlines */
+.deadline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.deadline-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.deadline-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+}
+
+.deadline-title {
+    flex: 1;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.deadline-count {
+    font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.deadline-list .progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.deadline-list .progress>div {
+    height: 100%;
+    border-radius: inherit;
+    background: #16a34a;
+}
+
+.deadline-list .bar {
+    letter-spacing: -0.05em;
+    white-space: pre;
+}
+
+.deadline-list li.warm .progress>div {
+    background: #eab308;
+}
+
+.deadline-list li.warm :is(.deadline-count, .bar) {
+    color: #ca8a04;
+}
+
+.deadline-list li.hot .progress>div {
+    background: var(--amber);
+}
+
+.deadline-list li.hot :is(.deadline-count, .bar) {
+    color: var(--amber);
+}
+
+.deadline-list li.today .progress>div {
+    background: var(--red);
+}
+
+.deadline-list li.today :is(.deadline-count, .bar) {
+    color: var(--red);
+    animation: throb 1s ease-in-out infinite;
+}
+
+.deadline-list li.passed {
+    opacity: 0.5;
+}
+
+.deadline-list li.passed .progress>div {
+    background: var(--dim);
+}
+
+[data-theme="unicorn"] .deadline-list .progress>div {
+    background: var(--rainbow);
+}
+
+[data-theme="kitten"] .deadline-list .progress {
+    height: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .deadline-list li.today :is(.deadline-count, .bar) {
+        animation: none;
     }
 }
 
@@ -1085,6 +1343,10 @@ input[type="checkbox"] {
 
 .kitten.walk .sprite {
     animation: trot 0.7s ease-in-out infinite;
+}
+
+.kitten.walk.hurry .sprite {
+    animation-duration: 0.4s;
 }
 
 .kitten.walk.zoomies .sprite {

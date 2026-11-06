@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePrefs } from "./prefs";
-import { currentSpeaker, elapsedMs, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, toggleTimer } from "./state";
+import { currentSpeaker, elapsedMs, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, timerPressure, toggleTimer } from "./state";
 import type { RoomApi } from "./useRoom";
 
 const DURATIONS = [30, 60, 90, 120, 180];
@@ -85,10 +85,11 @@ export function EggTimer({ state, online, update }: RoomApi) {
     }
 
     const fraction = overtime ? 1 : Math.min(1, remaining / total);
+    const pressure = timerPressure(t, now) ?? "calm";
     return (
-        <section className="card timer">
+        <section className="card timer" data-pressure={pressure}>
             <h2>{theme.timer}</h2>
-            <div className={`clock ${overtime ? "over" : fraction < 0.25 ? "low" : ""}`}>
+            <div className={`clock ${pressure}`}>
                 <div className="time">{fmt(remaining)}</div>
                 {theme.terminal ? (
                     <div className="bar">[{bar(fraction)}]</div>
@@ -97,6 +98,7 @@ export function EggTimer({ state, online, update }: RoomApi) {
                         <div style={{ width: `${fraction * 100}%` }} />
                     </div>
                 )}
+                {pressure === "hot" && <div className="hurry">{theme.hurry}</div>}
                 {overtime && <div className="alert">{theme.overtime}</div>}
             </div>
             <div className="speaker">{name(speakerId)}</div>

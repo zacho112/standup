@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { currentSpeaker, elapsedMs, type Timer } from "./state";
+import { timerPressure, type Pressure, type Timer } from "./state";
 
 type Mode = "walk" | "sit" | "nap";
+
+const SPEED: Record<Pressure, number> = { calm: 35, warm: 50, hot: 90, over: 170 };
 
 const MEOWS = ["meow!", "mrrp?", "purrr…", "=^.^=", "mew", "feed me"];
 const RARE_CHANCE = 0.15;
@@ -79,7 +81,9 @@ export function Kitten({ timer }: { timer: Timer }) {
             s.last = now;
             const maxX = window.innerWidth - SIZE;
             const t = timerRef.current;
-            const zoomies = currentSpeaker(t) !== null && elapsedMs(t, Date.now()) > t.secondsPerPerson * 1000;
+            const pressure = timerPressure(t, Date.now()) ?? "calm";
+            const zoomies = pressure === "over";
+            const restless = pressure === "hot" || zoomies;
             if (zoomies && !s.zoomies) {
                 switchMode("walk", 0);
                 s.quietUntil = 0;
@@ -87,12 +91,14 @@ export function Kitten({ timer }: { timer: Timer }) {
             }
             s.zoomies = zoomies;
             catRef.current?.classList.toggle("zoomies", zoomies);
+            catRef.current?.classList.toggle("hurry", pressure === "hot");
+            if (restless && s.mode !== "walk") switchMode("walk", 0);
 
             if (s.mode !== "walk") {
                 if (now > s.until) switchMode("walk", 0);
             } else {
                 const dx = s.target - s.x;
-                const speed = zoomies ? 170 : 35;
+                const speed = SPEED[pressure];
                 s.x = clamp(s.x + Math.sign(dx) * Math.min(Math.abs(dx), speed * dt), 0, maxX);
                 if (facingRef.current && Math.abs(dx) > 1) facingRef.current.style.transform = dx > 0 ? "scaleX(-1)" : "";
 
@@ -105,7 +111,7 @@ export function Kitten({ timer }: { timer: Timer }) {
 
                 if (Math.abs(s.target - s.x) < 1) {
                     const roll = Math.random();
-                    if (zoomies || roll < 0.35) s.target = rand(0, maxX);
+                    if (restless || roll < 0.35) s.target = rand(0, maxX);
                     else if (roll < 0.6) s.target = s.yarnX;
                     else if (roll < 0.85) switchMode("sit", rand(2000, 4500));
                     else switchMode("nap", rand(6000, 12000));

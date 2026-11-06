@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Deadlines } from "./Deadlines";
 import { EggTimer } from "./EggTimer";
 import { KeyBar, type HotKey } from "./KeyBar";
 import { Kitten } from "./Kitten";
@@ -7,8 +8,10 @@ import { People } from "./People";
 import { usePrefs } from "./prefs";
 import { Shell, type Command } from "./Shell";
 import {
+    addDeadline,
     addTopic,
     currentSpeaker,
+    DATE_RE,
     freshStandup,
     isToday,
     moodOf,
@@ -139,6 +142,16 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
             },
         },
         {
+            names: ["deadline"],
+            help: "<YYYY-MM-DD> <title>",
+            run: ([date, ...rest]) => {
+                const title = rest.join(" ").slice(0, 120);
+                if (!date || !DATE_RE.test(date) || !title) return "usage: deadline <YYYY-MM-DD> <title>";
+                update((s) => addDeadline(s, title, date, me.name));
+                return `scheduled: ${title} @ ${date}`;
+            },
+        },
+        {
             names: ["crt"],
             help: "[on|off]",
             run: ([v]) => setPrefs({ ...prefs, crt: v === "on" ? true : v === "off" ? false : !prefs.crt }),
@@ -227,6 +240,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
             <main className="grid">
                 <EggTimer {...room} />
                 <People {...room} meId={me.id} nudge={step === "mood"} />
+                <Deadlines {...room} meName={me.name} />
                 <ParkingLot {...room} meName={me.name} nudge={step === "topics"} onTopicsDone={markTopicsDone} />
             </main>
             {theme.terminal && <KeyBar keys={hotKeys} onDigit={(n) => update((s) => toggleMood(s, me.id, n))} />}
