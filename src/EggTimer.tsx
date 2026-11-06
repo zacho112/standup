@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { asciiDigits } from "./asciiDigits";
 import { usePrefs } from "./prefs";
 import { currentSpeaker, elapsedMs, moodOf, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, timerPressure, toggleCovered, toggleTimer } from "./state";
-import { TurnDialog } from "./TurnDialog";
 import type { RoomApi } from "./useRoom";
 
 const DURATIONS = [30, 60, 90, 120, 180];
@@ -61,9 +60,6 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
 
     const name = (id: string) => state.people[id]?.name ?? "Someone";
     const candidates = onlineCandidates(state, online);
-    // Identifies the current turn, so hiding the dialog only lasts for this turn.
-    const turnKey = `${t.order.join(",")}#${t.index}`;
-    const [hiddenTurn, setHiddenTurn] = useState<string | null>(null);
 
     if (!speakerId) {
         return (
@@ -94,6 +90,8 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
     const speaker = state.people[speakerId];
     const speakerMood = speaker ? moodOf(speaker) : null;
     const currentTopic = theme.prompts.findIndex((_, i) => !t.covered.includes(i));
+    const myTurn = speakerId === meId;
+    const allCovered = currentTopic === -1;
     return (
         <section className="card timer" data-pressure={pressure} data-paused={running ? undefined : ""}>
             <h2>{theme.timer}</h2>
@@ -115,11 +113,7 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
                 {pressure === "hot" && <div className="hurry">{theme.hurry}</div>}
                 {overtime && <div className="alert">{theme.overtime}</div>}
             </div>
-            {speakerId === meId && (
-                <button className="your-turn" onClick={() => setHiddenTurn(null)} title="Open your checklist">
-                    {theme.yourTurn}
-                </button>
-            )}
+            {myTurn && <div className="your-turn">{theme.yourTurn}</div>}
             <div className="speaker">
                 {speakerMood !== null && <span className="speaker-mood">{theme.moods[speakerMood]}</span>}
                 {name(speakerId)}
@@ -127,30 +121,34 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
             {state.settings.statusEnabled && state.people[speakerId]?.doing && (
                 <div className="speaker-doing">{state.people[speakerId].doing}</div>
             )}
-            <ul className={speakerId === meId ? "prompts mine" : "prompts"}>
+            <ul className={myTurn ? "prompts mine" : "prompts"}>
                 {theme.prompts.map((prompt, i) => (
                     <li key={prompt} className={t.covered.includes(i) ? "covered" : i === currentTopic ? "current" : ""}>
                         {prompt}
                     </li>
                 ))}
             </ul>
-            <TurnDialog
-                open={speakerId === meId && hiddenTurn !== turnKey}
-                theme={theme}
-                time={fmt(remaining)}
-                pressure={pressure}
-                covered={t.covered}
-                onToggle={(i) => update((s) => toggleCovered(s, i))}
-                onDone={() => update(nextSpeaker)}
-                onClose={() => setHiddenTurn(turnKey)}
-            />
-            <div className="controls">
-                <button onClick={() => update(toggleTimer)}>{running ? "pause" : "resume"}</button>
-                <button className="primary" onClick={() => update(nextSpeaker)}>
-                    {t.index === t.order.length - 1 ? "finish" : "next"}
-                </button>
-                <button onClick={() => update(resetTimer)}>reset</button>
-            </div>
+            {myTurn && (
+                <div className="my-turn">
+                    <p className="turn-prompt" key={currentTopic}>
+                        {allCovered ? theme.allCovered : theme.prompts[currentTopic]}
+                    </p>
+                    <div className="controls">
+                        {t.covered.length > 0 && (
+                            <button onClick={() => update((s) => toggleCovered(s, s.timer.covered[s.timer.covered.length - 1]))}>back</button>
+                        )}
+                        {allCovered ? (
+                            <button className="primary" onClick={() => update(nextSpeaker)}>
+                                {theme.turnDone}
+                            </button>
+                        ) : (
+                            <button className="primary" onClick={() => update((s) => toggleCovered(s, currentTopic))}>
+                                {theme.topicCovered}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
             <ol className="queue">
                 {t.order.map((id, i) => (
                     <li key={id} className={i < t.index ? "done" : i === t.index ? "current" : ""}>
@@ -158,6 +156,11 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
                     </li>
                 ))}
             </ol>
+            <div className="board-controls" aria-label="Board controls">
+                <button onClick={() => update(toggleTimer)}>{running ? "pause" : "resume"}</button>
+                <button onClick={() => update(nextSpeaker)}>skip</button>
+                <button onClick={() => update(resetTimer)}>reset</button>
+            </div>
         </section>
     );
 }
