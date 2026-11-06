@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { asciiDigits } from "./asciiDigits";
 import { usePrefs } from "./prefs";
-import { currentSpeaker, elapsedMs, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, timerPressure, toggleTimer } from "./state";
+import { currentSpeaker, elapsedMs, moodOf, nextSpeaker, onlineCandidates, resetTimer, setDuration, startRound, timerPressure, toggleCovered, toggleTimer } from "./state";
+import { TurnDialog } from "./TurnDialog";
 import type { RoomApi } from "./useRoom";
 
 const DURATIONS = [30, 60, 90, 120, 180];
@@ -41,7 +42,7 @@ function ding() {
     osc.stop(ctx.currentTime + 1.2);
 }
 
-export function EggTimer({ state, online, update }: RoomApi) {
+export function EggTimer({ state, online, update, meId }: RoomApi & { meId: string }) {
     const { theme } = usePrefs();
     const t = state.timer;
     const running = t.startedAt !== null;
@@ -60,6 +61,9 @@ export function EggTimer({ state, online, update }: RoomApi) {
 
     const name = (id: string) => state.people[id]?.name ?? "Someone";
     const candidates = onlineCandidates(state, online);
+    // Identifies the current turn, so hiding the dialog only lasts for this turn.
+    const turnKey = `${t.order.join(",")}#${t.index}`;
+    const [hiddenTurn, setHiddenTurn] = useState<string | null>(null);
 
     if (!speakerId) {
         return (
@@ -87,6 +91,9 @@ export function EggTimer({ state, online, update }: RoomApi) {
 
     const fraction = overtime ? 1 : Math.min(1, remaining / total);
     const pressure = timerPressure(t, now) ?? "calm";
+    const speaker = state.people[speakerId];
+    const speakerMood = speaker ? moodOf(speaker) : null;
+    const currentTopic = theme.prompts.findIndex((_, i) => !t.covered.includes(i));
     return (
         <section className="card timer" data-pressure={pressure} data-paused={running ? undefined : ""}>
             <h2>{theme.timer}</h2>
@@ -108,7 +115,35 @@ export function EggTimer({ state, online, update }: RoomApi) {
                 {pressure === "hot" && <div className="hurry">{theme.hurry}</div>}
                 {overtime && <div className="alert">{theme.overtime}</div>}
             </div>
-            <div className="speaker">{name(speakerId)}</div>
+            {speakerId === meId && (
+                <button className="your-turn" onClick={() => setHiddenTurn(null)} title="Open your checklist">
+                    {theme.yourTurn}
+                </button>
+            )}
+            <div className="speaker">
+                {speakerMood !== null && <span className="speaker-mood">{theme.moods[speakerMood]}</span>}
+                {name(speakerId)}
+            </div>
+            {state.settings.statusEnabled && state.people[speakerId]?.doing && (
+                <div className="speaker-doing">{state.people[speakerId].doing}</div>
+            )}
+            <ul className={speakerId === meId ? "prompts mine" : "prompts"}>
+                {theme.prompts.map((prompt, i) => (
+                    <li key={prompt} className={t.covered.includes(i) ? "covered" : i === currentTopic ? "current" : ""}>
+                        {prompt}
+                    </li>
+                ))}
+            </ul>
+            <TurnDialog
+                open={speakerId === meId && hiddenTurn !== turnKey}
+                theme={theme}
+                time={fmt(remaining)}
+                pressure={pressure}
+                covered={t.covered}
+                onToggle={(i) => update((s) => toggleCovered(s, i))}
+                onDone={() => update(nextSpeaker)}
+                onClose={() => setHiddenTurn(turnKey)}
+            />
             <div className="controls">
                 <button onClick={() => update(toggleTimer)}>{running ? "pause" : "resume"}</button>
                 <button className="primary" onClick={() => update(nextSpeaker)}>

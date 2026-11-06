@@ -18,6 +18,7 @@ import {
     nextSpeaker,
     onlineCandidates,
     resetTimer,
+    setDoing,
     stamp,
     startRound,
     toggleMood,
@@ -73,6 +74,8 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                 name: me.name,
                 mood: prev?.mood ?? null,
                 moodAt: prev?.moodAt ?? 0,
+                doing: prev?.doing ?? "",
+                doingAt: prev?.doingAt ?? 0,
                 deleted: false,
                 updatedAt: stamp(prev?.updatedAt),
             };
@@ -139,6 +142,15 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                 update((s) => addTopic(s, text, needsLT, me.name));
                 markTopicsDone();
                 return `parked: ${text}${needsLT ? " [root]" : ""}`;
+            },
+        },
+        {
+            names: ["doing"],
+            help: "<what you're working on>",
+            run: (args) => {
+                const text = args.join(" ");
+                update((s) => setDoing(s, me.id, text));
+                return text ? `status set: ${text}` : "status cleared";
             },
         },
         {
@@ -238,7 +250,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                 {!theme.terminal && <button onClick={onLeave}>leave</button>}
             </header>
             <main className="grid">
-                <EggTimer {...room} />
+                <EggTimer {...room} meId={me.id} />
                 <People {...room} meId={me.id} nudge={step === "mood"} />
                 <Deadlines {...room} meName={me.name} />
                 <ParkingLot {...room} meName={me.name} nudge={step === "topics"} onTopicsDone={markTopicsDone} />

@@ -299,6 +299,7 @@ input[type="checkbox"] {
     .clock .time,
     .timer,
     .hurry,
+    .your-turn,
     .clock .progress,
     .clock .progress>div,
     .clock .progress>div::after {
@@ -411,6 +412,250 @@ input[type="checkbox"] {
 
 .people .name {
     flex: 1;
+    min-width: 0;
+}
+
+.people .doing,
+.people .doing-input {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+}
+
+.people .doing {
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.people .doing .stale {
+    color: var(--dim);
+}
+
+.people .doing-input {
+    width: 100%;
+    padding: 0.2rem 0.5rem;
+}
+
+.status-toggle {
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: normal;
+}
+
+.speaker-mood {
+    margin-right: 0.4em;
+}
+
+.your-turn {
+    margin-bottom: -0.6rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.prompts {
+    list-style: none;
+    padding: 0;
+    margin: -0.3rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.prompts li {
+    padding: 0.15rem 0.6rem;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.prompts.mine li {
+    border-style: solid;
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+.prompts li.current {
+    border-style: solid;
+    border-color: var(--accent);
+    color: var(--text);
+    font-weight: 700;
+}
+
+.prompts li.covered {
+    text-decoration: line-through;
+    opacity: 0.55;
+}
+
+.prompts li.covered::after {
+    content: " ✓";
+}
+
+button.your-turn {
+    border: none;
+    padding: 0;
+    background: none;
+}
+
+/* Speaker's own talking-point popup */
+.turn-dialog {
+    width: min(92vw, 420px);
+    padding: 1.6rem 1.4rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    color: var(--text);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.turn-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.turn-dialog h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--accent);
+}
+
+.turn-time {
+    margin-top: 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+.turn-dialog[data-pressure="hot"] .turn-time {
+    color: var(--amber);
+}
+
+.turn-dialog[data-pressure="over"] .turn-time {
+    color: var(--red);
+}
+
+.turn-steps {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 1rem 0 0;
+}
+
+.turn-steps li {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+.turn-steps li.current {
+    background: var(--accent);
+}
+
+.turn-steps li.covered {
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.turn-prompt {
+    margin: 1.2rem 0 1.4rem;
+    font-size: 1.7rem;
+    font-weight: 700;
+    animation: prompt-in 0.25s ease-out;
+}
+
+@keyframes prompt-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+.turn-dialog .controls {
+    justify-content: center;
+}
+
+.turn-hide {
+    margin-top: 0.8rem;
+    border: none;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+[data-theme="hacker"] .turn-dialog {
+    border-radius: 0;
+    box-shadow: 0 0 30px rgba(51, 255, 102, 0.15);
+}
+
+[data-theme="hacker"] .card .turn-dialog h2::before,
+[data-theme="hacker"] .card .turn-dialog h2::after {
+    content: none;
+}
+
+[data-theme="hacker"] .card .turn-dialog h2 {
+    position: static;
+    padding: 0;
+    background: none;
+    color: var(--text);
+}
+
+[data-theme="hacker"] .turn-steps li {
+    border-radius: 0;
+}
+
+[data-theme="hacker"] .turn-prompt::before {
+    content: "$ ";
+    color: var(--muted);
+}
+
+[data-theme="unicorn"] .turn-dialog {
+    border: 2px solid transparent;
+    border-radius: 24px;
+    background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--rainbow) border-box;
+}
+
+[data-theme="kitten"] .turn-dialog {
+    border: 2px solid var(--border);
+    border-radius: 22px;
+    box-shadow: 0 6px 0 var(--border), 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .turn-prompt {
+        animation: none;
+    }
+}
+
+[data-theme="hacker"] .prompts li {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+[data-theme="hacker"] .prompts li::before {
+    content: "> ";
+}
+
+[data-theme="hacker"] .your-turn {
+    animation: blink 1s steps(1) infinite;
+}
+
+.speaker-doing {
+    margin-top: -0.6rem;
+    color: var(--muted);
+    font-style: italic;
+    overflow-wrap: anywhere;
+}
+
+[data-theme="hacker"] .speaker-doing::before {
+    content: "# ";
 }
 
 .people button:not(.icon) {

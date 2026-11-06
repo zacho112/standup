@@ -1,6 +1,35 @@
+import { useState } from "react";
 import { usePrefs } from "./prefs";
-import { currentSpeaker, enqueue, moodOf, patchPerson, toggleMood } from "./state";
+import { DOING_MAX, currentSpeaker, daysAgo, enqueue, moodOf, patchPerson, setDoing, setStatusEnabled, toggleMood, type Person } from "./state";
 import type { RoomApi } from "./useRoom";
+
+const staleness = (p: Person) => {
+    const days = daysAgo(p.doingAt);
+    return days === 0 ? "" : days === 1 ? " · yesterday" : ` · ${days}d ago`;
+};
+
+function MyStatus({ me, placeholder, onSave }: { me: Person; placeholder: string; onSave: (text: string) => void }) {
+    const [draft, setDraft] = useState(me.doing);
+    const save = () => {
+        if (draft.trim() !== me.doing) onSave(draft);
+    };
+    return (
+        <input
+            type="text"
+            className="doing-input"
+            aria-label="What I'm doing"
+            placeholder={placeholder}
+            value={draft}
+            maxLength={DOING_MAX}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={save}
+            onKeyDown={(e) => {
+                if (e.key === "Enter") e.currentTarget.blur();
+                if (e.key === "Escape") setDraft(me.doing);
+            }}
+        />
+    );
+}
 
 export function People({ state, online, update, meId, nudge }: RoomApi & { meId: string; nudge: boolean }) {
     const { theme } = usePrefs();
@@ -11,8 +40,14 @@ export function People({ state, online, update, meId, nudge }: RoomApi & { meId:
         .sort((a, b) => Number(online.has(b.id)) - Number(online.has(a.id)) || a.name.localeCompare(b.name));
     const me = state.people[meId];
     const myMood = me ? moodOf(me) : null;
-    const todays = people.map(moodOf).filter((m) => m !== null);
+    // Moods stay secret until that person's turn (or after it); your own is always visible to you.
+    const revealed = new Set([meId, ...t.order.slice(0, Math.min(t.index + 1, t.order.length))]);
+    const todays = people
+        .filter((p) => revealed.has(p.id))
+        .map(moodOf)
+        .filter((m) => m !== null);
     const avg = todays.length ? theme.moods[Math.round(todays.reduce((a, b) => a + b, 0) / todays.length)] : null;
+    const statusOn = state.settings.statusEnabled;
 
     return (
         <section className="card team">
@@ -34,10 +69,21 @@ export function People({ state, online, update, meId, nudge }: RoomApi & { meId:
                     const mood = moodOf(p);
                     return (
                         <li key={p.id} className={[!isOnline && "offline", p.id === speakerId && "speaking"].filter(Boolean).join(" ")}>
-                            <span className="mood">{mood !== null ? theme.moods[mood] : "·"}</span>
+                            <span className="mood" title={mood !== null && !revealed.has(p.id) ? "Revealed on their turn" : undefined}>
+                                {mood === null ? "·" : revealed.has(p.id) ? theme.moods[mood] : "?"}
+                            </span>
                             <span className="name">
                                 {p.name}
                                 {p.id === meId && <span className="muted"> (you)</span>}
+                                {statusOn && p.id === meId && (
+                                    <MyStatus key={p.doingAt} me={p} placeholder={theme.statusPlaceholder} onSave={(text) => update((s) => setDoing(s, meId, text))} />
+                                )}
+                                {statusOn && p.id !== meId && p.doing && (
+                                    <span className="doing">
+                                        {p.doing}
+                                        <span className="stale">{staleness(p)}</span>
+                                    </span>
+                                )}
                             </span>
                             {p.id === speakerId && <span className="badge">{theme.live}</span>}
                             {speakerId && !t.order.includes(p.id) && <button onClick={() => update((s) => enqueue(s, p.id))}>+queue</button>}
@@ -50,6 +96,10 @@ export function People({ state, online, update, meId, nudge }: RoomApi & { meId:
                     );
                 })}
             </ul>
+            <label className="check status-toggle">
+                <input type="checkbox" checked={statusOn} onChange={(e) => update((s) => setStatusEnabled(s, e.target.checked))} />
+                {theme.statusToggle}
+            </label>
         </section>
     );
 }

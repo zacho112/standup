@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { timerPressure, type Pressure, type Timer } from "./state";
+import { elapsedMs, timerPressure, type Pressure, type Timer } from "./state";
 
 type Mode = "walk" | "sit" | "nap";
 
@@ -35,6 +35,7 @@ export function Kitten({ timer }: { timer: Timer }) {
     const [reduceMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const catRef = useRef<HTMLDivElement>(null);
     const facingRef = useRef<HTMLSpanElement>(null);
+    const spriteRef = useRef<HTMLSpanElement>(null);
     const yarnRef = useRef<HTMLDivElement>(null);
     const timerRef = useRef(timer);
     const sim = useRef({ x: 40, target: 300, mode: "walk" as Mode, until: 0, yarnX: 0, yarnSpin: 0, zoomies: false, last: 0, raf: 0, quietUntil: 0 });
@@ -93,12 +94,15 @@ export function Kitten({ timer }: { timer: Timer }) {
             catRef.current?.classList.toggle("zoomies", zoomies);
             catRef.current?.classList.toggle("hurry", pressure === "hot");
             if (restless && s.mode !== "walk") switchMode("walk", 0);
+            // The longer the overtime, the wilder the zoomies.
+            const overSec = zoomies ? Math.max(0, elapsedMs(t, Date.now()) / 1000 - t.secondsPerPerson) : 0;
+            if (spriteRef.current) spriteRef.current.style.animationDuration = zoomies ? `${Math.max(0.08, 0.25 - overSec * 0.004)}s` : "";
 
             if (s.mode !== "walk") {
                 if (now > s.until) switchMode("walk", 0);
             } else {
                 const dx = s.target - s.x;
-                const speed = SPEED[pressure];
+                const speed = zoomies ? Math.min(900, SPEED.over + overSec * 12) : SPEED[pressure];
                 s.x = clamp(s.x + Math.sign(dx) * Math.min(Math.abs(dx), speed * dt), 0, maxX);
                 if (facingRef.current && Math.abs(dx) > 1) facingRef.current.style.transform = dx > 0 ? "scaleX(-1)" : "";
 
@@ -141,7 +145,7 @@ export function Kitten({ timer }: { timer: Timer }) {
                 {bubble && <span className="bubble">{bubble}</span>}
                 {mode === "nap" && <span className="zzz">💤</span>}
                 <span ref={facingRef} className="facing">
-                    <span className={jumping ? "sprite jump" : "sprite"} onAnimationEnd={() => setJumping(false)}>
+                    <span ref={spriteRef} className={jumping ? "sprite jump" : "sprite"} onAnimationEnd={() => setJumping(false)}>
                         🐈
                     </span>
                 </span>

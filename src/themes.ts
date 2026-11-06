@@ -32,6 +32,14 @@ export type Theme = {
     // Short name for "leadership team member needed".
     lt: string;
     ltNeeded: string;
+    statusToggle: string;
+    statusPlaceholder: string;
+    yourTurn: string;
+    turnDone: string;
+    topicCovered: string;
+    allCovered: string;
+    // Short talking points shown to the current speaker.
+    prompts: string[];
 };
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -65,6 +73,13 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlinePlaceholder: "> what's due?",
         lt: "root",
         ltNeeded: "requires root",
+        statusToggle: "ps aux  # show what everyone is doing",
+        statusPlaceholder: "> echo $DOING",
+        yourTurn: ">> your turn <<",
+        turnDone: "exit 0 → next",
+        topicCovered: "ok",
+        allCovered: "all checks passed",
+        prompts: ["mood?", "blockers?", "highlights?"],
     },
     default: {
         name: "default",
@@ -96,6 +111,13 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlinePlaceholder: "What's due?",
         lt: "LT",
         ltNeeded: "LT needed",
+        statusToggle: "Show what everyone is working on",
+        statusPlaceholder: "What are you working on?",
+        yourTurn: "Your turn!",
+        turnDone: "I'm done → next",
+        topicCovered: "✓ Covered",
+        allCovered: "All covered!",
+        prompts: ["How's your mood?", "Any blockers?", "Anything important?"],
     },
     unicorn: {
         name: "unicorn",
@@ -127,6 +149,13 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlinePlaceholder: "What magic is due?",
         lt: "LT",
         ltNeeded: "LT needed",
+        statusToggle: "✨ Show what everyone is conjuring",
+        statusPlaceholder: "What magic are you making?",
+        yourTurn: "✨ Your turn to shine! ✨",
+        turnDone: "✨ Done, pass the magic →",
+        topicCovered: "✨ Covered",
+        allCovered: "✨ All sparkly!",
+        prompts: ["🌈 Mood?", "🌧️ Blockers?", "✨ Highlights?"],
     },
     kitten: {
         name: "kitten",
@@ -158,6 +187,13 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlinePlaceholder: "What's due, meow?",
         lt: "LT",
         ltNeeded: "LT needed",
+        statusToggle: "🐾 Show what everyone is chasing",
+        statusPlaceholder: "What are you chasing?",
+        yourTurn: "🐾 Your turn, kitty!",
+        turnDone: "🐾 Done, next kitty →",
+        topicCovered: "🐾 Covered",
+        allCovered: "😻 All purrfect!",
+        prompts: ["😺 Mood?", "🧶 Tangles (blockers)?", "🐟 Big catch?"],
     },
 };
 

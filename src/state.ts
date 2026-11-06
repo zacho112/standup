@@ -5,6 +5,8 @@ export type Person = {
     name: string;
     mood: number | null;
     moodAt: number;
+    doing: string;
+    doingAt: number;
     deleted: boolean;
     updatedAt: number;
 };
@@ -27,6 +29,8 @@ export type Timer = {
     secondsPerPerson: number;
     startedAt: number | null;
     elapsedMs: number;
+    // Indexes of the talking points the current speaker has ticked off.
+    covered: number[];
     updatedAt: number;
 };
 
@@ -41,10 +45,16 @@ export type Deadline = {
     updatedAt: number;
 };
 
+export type Settings = {
+    statusEnabled: boolean;
+    updatedAt: number;
+};
+
 export type RoomState = {
     people: Record<string, Person>;
     parking: Record<string, ParkingItem>;
     deadlines: Record<string, Deadline>;
+    settings: Settings;
     timer: Timer;
 };
 
@@ -64,7 +74,8 @@ export const emptyState = (): RoomState => ({
     people: {},
     parking: {},
     deadlines: {},
-    timer: { order: [], index: -1, secondsPerPerson: 90, startedAt: null, elapsedMs: 0, updatedAt: 0 },
+    settings: { statusEnabled: false, updatedAt: 0 },
+    timer: { order: [], index: -1, secondsPerPerson: 60, startedAt: null, elapsedMs: 0, covered: [], updatedAt: 0 },
 });
 
 // Keeps local edits winning over a peer whose clock is slightly ahead.
@@ -102,13 +113,33 @@ export function toggleMood(s: RoomState, id: string, mood: number): RoomState {
     return p ? patchPerson(s, id, { mood: moodOf(p) === mood ? null : mood, moodAt: Date.now() }) : s;
 }
 
+export const DOING_MAX = 140;
+
+export const setDoing = (s: RoomState, id: string, doing: string) =>
+    patchPerson(s, id, { doing: doing.trim().slice(0, DOING_MAX), doingAt: Date.now() });
+
+export const setStatusEnabled = (s: RoomState, statusEnabled: boolean): RoomState => ({
+    ...s,
+    settings: { statusEnabled, updatedAt: stamp(s.settings.updatedAt) },
+});
+
+// Whole calendar days since the timestamp (0 = today).
+export function daysAgo(ts: number, now = Date.now()): number {
+    const day = (t: number) => {
+        const d = new Date(t);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    };
+    return Math.round((day(now) - day(ts)) / 86_400_000);
+}
+
 const withTimer = (s: RoomState, changes: Partial<Timer>): RoomState => ({
     ...s,
     timer: { ...s.timer, ...changes, updatedAt: stamp(s.timer.updatedAt) },
 });
 
 export const startRound = (s: RoomState, ids: string[]) =>
-    withTimer(s, { order: shuffle(ids), index: 0, startedAt: Date.now(), elapsedMs: 0 });
+    withTimer(s, { order: shuffle(ids), index: 0, startedAt: Date.now(), elapsedMs: 0, covered: [] });
 
 export const toggleTimer = (s: RoomState) =>
     withTimer(
@@ -118,10 +149,13 @@ export const toggleTimer = (s: RoomState) =>
 
 export function nextSpeaker(s: RoomState): RoomState {
     const index = s.timer.index + 1;
-    return withTimer(s, { index, elapsedMs: 0, startedAt: index < s.timer.order.length ? Date.now() : null });
+    return withTimer(s, { index, elapsedMs: 0, covered: [], startedAt: index < s.timer.order.length ? Date.now() : null });
 }
 
-export const resetTimer = (s: RoomState) => withTimer(s, { order: [], index: -1, startedAt: null, elapsedMs: 0 });
+export const resetTimer = (s: RoomState) => withTimer(s, { order: [], index: -1, startedAt: null, elapsedMs: 0, covered: [] });
+
+export const toggleCovered = (s: RoomState, i: number) =>
+    withTimer(s, { covered: s.timer.covered.includes(i) ? s.timer.covered.filter((c) => c !== i) : [...s.timer.covered, i] });
 
 export const setDuration = (s: RoomState, secondsPerPerson: number) => withTimer(s, { secondsPerPerson });
 
@@ -178,8 +212,8 @@ export function freshStandup(s: RoomState): RoomState {
                 i.done && i.archivedAt === null && !i.deleted ? { ...i, archivedAt: now, updatedAt: stamp(i.updatedAt) } : i,
             ]),
     );
-    const timer = { ...s.timer, order: [], index: -1, startedAt: null, elapsedMs: 0, updatedAt: stamp(s.timer.updatedAt) };
-    return { people, parking, deadlines: s.deadlines, timer };
+    const timer = { ...s.timer, order: [], index: -1, startedAt: null, elapsedMs: 0, covered: [], updatedAt: stamp(s.timer.updatedAt) };
+    return { people, parking, deadlines: s.deadlines, settings: s.settings, timer };
 }
 
 export function shuffle<T>(items: T[]): T[] {
@@ -211,6 +245,7 @@ export function merge(a: RoomState, b: RoomState): RoomState {
         people: mergeRecords(a.people, b.people),
         parking: mergeRecords(a.parking, b.parking),
         deadlines: mergeRecords(a.deadlines, b.deadlines),
+        settings: newer(a.settings, b.settings),
         timer: newer(a.timer, b.timer),
     };
 }
@@ -226,6 +261,8 @@ const isPerson = (p: unknown): p is Person =>
     isStr(p.name) &&
     (p.mood === null || (Number.isInteger(p.mood) && (p.mood as number) >= 0 && (p.mood as number) < MOOD_COUNT)) &&
     isNum(p.moodAt) &&
+    isStr(p.doing) &&
+    isNum(p.doingAt) &&
     typeof p.deleted === "boolean" &&
     isNum(p.updatedAt);
 
@@ -260,12 +297,21 @@ const isTimer = (t: unknown): t is Timer =>
     isNum(t.secondsPerPerson) &&
     (t.startedAt === null || isNum(t.startedAt)) &&
     isNum(t.elapsedMs) &&
+    (t.covered === undefined || (Array.isArray(t.covered) && t.covered.length <= 20 && t.covered.every(Number.isInteger))) &&
     isNum(t.updatedAt);
 
 function pick<T extends { id: string }>(rec: unknown, guard: (v: unknown) => v is T): Record<string, T> {
     if (!isObj(rec)) return {};
     return Object.fromEntries(Object.entries(rec).filter(([id, v]) => id !== "__proto__" && guard(v) && v.id === id)) as Record<string, T>;
 }
+
+// Fills fields added in later app versions so older saved/peer data still validates.
+const withPersonDefaults = (rec: unknown) =>
+    isObj(rec)
+        ? Object.fromEntries(Object.entries(rec).map(([id, p]) => [id, isObj(p) ? { doing: "", doingAt: 0, ...p } : p]))
+        : rec;
+
+const isSettings = (x: unknown): x is Settings => isObj(x) && typeof x.statusEnabled === "boolean" && isNum(x.updatedAt);
 
 export function sanitize(x: unknown): RoomState | null {
     if (!isObj(x) || !isTimer(x.timer)) return null;
@@ -275,5 +321,11 @@ export function sanitize(x: unknown): RoomState | null {
     const deadlines = Object.fromEntries(
         Object.entries(pick(x.deadlines, isDeadline)).filter(([, d]) => !isDeadlineExpired(d, now)),
     );
-    return { people: pick(x.people, isPerson), parking, deadlines, timer: x.timer };
+    return {
+        people: pick(withPersonDefaults(x.people), isPerson),
+        parking,
+        deadlines,
+        settings: isSettings(x.settings) ? { statusEnabled: x.settings.statusEnabled, updatedAt: x.settings.updatedAt } : emptyState().settings,
+        timer: { ...x.timer, covered: x.timer.covered ?? [] },
+    };
 }
