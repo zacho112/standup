@@ -131,14 +131,14 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
         },
         {
             names: ["park"],
-            help: "[--lt] <topic>",
+            help: "[--root] <topic>",
             run: (args) => {
-                const needsLT = args[0] === "--lt";
+                const needsLT = args[0] === "--root" || args[0] === "--lt";
                 const text = (needsLT ? args.slice(1) : args).join(" ").slice(0, 300);
-                if (!text) return "usage: park [--lt] <topic>";
+                if (!text) return "usage: park [--root] <topic>";
                 update((s) => addTopic(s, text, needsLT, me.name));
                 markTopicsDone();
-                return `parked: ${text}${needsLT ? " [LT]" : ""}`;
+                return `parked: ${text}${needsLT ? " [root]" : ""}`;
             },
         },
         {

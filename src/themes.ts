@@ -29,6 +29,9 @@ export type Theme = {
     deadlines: string;
     deadlinesEmpty: string;
     deadlinePlaceholder: string;
+    // Short name for "leadership team member needed".
+    lt: string;
+    ltNeeded: string;
 };
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -60,6 +63,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlines: "deadlines --watch",
         deadlinesEmpty: "// no deadlines scheduled",
         deadlinePlaceholder: "> what's due?",
+        lt: "root",
+        ltNeeded: "requires root",
     },
     default: {
         name: "default",
@@ -89,6 +94,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlines: "Deadlines",
         deadlinesEmpty: "No deadlines yet.",
         deadlinePlaceholder: "What's due?",
+        lt: "LT",
+        ltNeeded: "LT needed",
     },
     unicorn: {
         name: "unicorn",
@@ -118,6 +125,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlines: "🌈 Magic dates",
         deadlinesEmpty: "No magic dates yet ✨",
         deadlinePlaceholder: "What magic is due?",
+        lt: "LT",
+        ltNeeded: "LT needed",
     },
     kitten: {
         name: "kitten",
@@ -147,6 +156,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         deadlines: "🐟 Feeding times (deadlines)",
         deadlinesEmpty: "No feeding times scheduled.",
         deadlinePlaceholder: "What's due, meow?",
+        lt: "LT",
+        ltNeeded: "LT needed",
     },
 };
 

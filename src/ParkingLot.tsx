@@ -65,7 +65,7 @@ export function ParkingLot({
                 {theme.parking}{" "}
                 {open.length > 0 && (
                     <span className="muted">
-                        · {open.length} open{ltCount > 0 && `, ${ltCount} need LT`}
+                        · {open.length} open{ltCount > 0 && `, ${ltCount} need ${theme.lt}`}
                     </span>
                 )}
             </h2>
@@ -87,7 +87,7 @@ export function ParkingLot({
                     maxLength={300}
                 />
                 <label className="check">
-                    <input type="checkbox" checked={needsLT} onChange={(e) => setNeedsLT(e.target.checked)} /> LT needed
+                    <input type="checkbox" checked={needsLT} onChange={(e) => setNeedsLT(e.target.checked)} /> {theme.ltNeeded}
                 </label>
                 <button className="primary" disabled={!text.trim()}>
                     add
@@ -112,7 +112,7 @@ export function ParkingLot({
                                 title="Toggle whether an LT member is needed"
                                 onClick={() => patch(it.id, { needsLT: !it.needsLT })}
                             >
-                                {it.needsLT ? "LT needed" : "+LT"}
+                                {it.needsLT ? theme.ltNeeded : `+${theme.lt}`}
                             </button>
                             <button className="icon" title="Delete" onClick={() => patch(it.id, { deleted: true })}>
                                 ×
@@ -137,7 +137,7 @@ export function ParkingLot({
                                 <span className="muted date">{formatDate(it.archivedAt ?? it.updatedAt)}</span>
                                 <span className="text">{it.text}</span>
                                 <span className="muted">{it.author}</span>
-                                {it.needsLT && <span className="lt on">LT</span>}
+                                {it.needsLT && <span className="lt on">{theme.lt}</span>}
                                 <button onClick={() => patch(it.id, { archivedAt: null, done: false })}>restore</button>
                                 <button className="icon" title="Delete permanently" onClick={() => patch(it.id, { deleted: true })}>
                                     ×

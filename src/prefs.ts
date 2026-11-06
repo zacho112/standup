@@ -3,7 +3,7 @@ import { THEMES, type Theme, type ThemeName } from "./themes";
 
 export type Prefs = { theme: ThemeName; crt: boolean };
 
-export const DEFAULT_PREFS: Prefs = { theme: "hacker", crt: true };
+export const DEFAULT_PREFS: Prefs = { theme: "default", crt: true };
 
 export const PrefsContext = createContext<{ prefs: Prefs; setPrefs: (p: Prefs) => void }>({
     prefs: DEFAULT_PREFS,
