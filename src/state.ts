@@ -57,8 +57,8 @@ const RETENTION_MS = ARCHIVE_DAYS * 24 * 60 * 60 * 1000;
 const isExpired = (i: ParkingItem, now: number) =>
     (i.archivedAt !== null && now - i.archivedAt > RETENTION_MS) || (i.deleted && now - i.updatedAt > RETENTION_MS);
 
-const isDeadlineExpired = (d: Deadline, now: number) =>
-    (d.deleted && now - d.updatedAt > RETENTION_MS) || now - Date.parse(d.date) > RETENTION_MS;
+// Overdue deadlines stay until someone removes them; only removed ones are cleaned up.
+const isDeadlineExpired = (d: Deadline, now: number) => d.deleted && now - d.updatedAt > RETENTION_MS;
 
 export const emptyState = (): RoomState => ({
     people: {},

@@ -289,6 +289,12 @@ input[type="checkbox"] {
     }
 }
 
+.timer[data-paused],
+.timer[data-paused] *,
+.timer[data-paused] *::after {
+    animation: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .clock .time,
     .timer,
@@ -1269,40 +1275,52 @@ input[type="checkbox"] {
     white-space: pre;
 }
 
+.deadline-list .bar .empty {
+    color: var(--dim);
+    text-shadow: none;
+}
+
 .deadline-list li.warm .progress>div {
-    background: #eab308;
-}
-
-.deadline-list li.warm :is(.deadline-count, .bar) {
-    color: #ca8a04;
-}
-
-.deadline-list li.hot .progress>div {
     background: var(--amber);
 }
 
-.deadline-list li.hot :is(.deadline-count, .bar) {
+.deadline-list li.warm :is(.deadline-count, .bar) {
     color: var(--amber);
 }
 
-.deadline-list li.today .progress>div {
+.deadline-list li:is(.hot, .today) .progress>div {
     background: var(--red);
 }
 
-.deadline-list li.today :is(.deadline-count, .bar) {
+.deadline-list li:is(.hot, .today) :is(.deadline-count, .bar) {
     color: var(--red);
+}
+
+.deadline-list li.today .deadline-count {
     animation: throb 1s ease-in-out infinite;
 }
 
-.deadline-list li.passed {
-    opacity: 0.5;
+.deadline-list li.overdue .progress>div {
+    background: #111;
 }
 
-.deadline-list li.passed .progress>div {
-    background: var(--dim);
+.deadline-list li.overdue .deadline-count {
+    color: var(--text);
 }
 
-[data-theme="unicorn"] .deadline-list .progress>div {
+/* "Black" would vanish on the hacker background, so overdue is shown inverted instead. */
+[data-theme="hacker"] .deadline-list li.overdue .bar .fill {
+    color: var(--red);
+}
+
+[data-theme="hacker"] .deadline-list li.overdue .deadline-count {
+    background: var(--red);
+    color: var(--bg);
+    text-shadow: none;
+    padding: 0 0.3em;
+}
+
+[data-theme="unicorn"] .deadline-list li.calm .progress>div {
     background: var(--rainbow);
 }
 
@@ -1311,7 +1329,7 @@ input[type="checkbox"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .deadline-list li.today :is(.deadline-count, .bar) {
+    .deadline-list li.today .deadline-count {
         animation: none;
     }
 }

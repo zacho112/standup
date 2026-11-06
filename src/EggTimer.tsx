@@ -88,7 +88,7 @@ export function EggTimer({ state, online, update }: RoomApi) {
     const fraction = overtime ? 1 : Math.min(1, remaining / total);
     const pressure = timerPressure(t, now) ?? "calm";
     return (
-        <section className="card timer" data-pressure={pressure}>
+        <section className="card timer" data-pressure={pressure} data-paused={running ? undefined : ""}>
             <h2>{theme.timer}</h2>
             <div className={`clock ${pressure}`}>
                 {theme.terminal ? (

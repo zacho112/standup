@@ -81,7 +81,7 @@ export function Kitten({ timer }: { timer: Timer }) {
             s.last = now;
             const maxX = window.innerWidth - SIZE;
             const t = timerRef.current;
-            const pressure = timerPressure(t, Date.now()) ?? "calm";
+            const pressure = t.startedAt === null ? "calm" : (timerPressure(t, Date.now()) ?? "calm");
             const zoomies = pressure === "over";
             const restless = pressure === "hot" || zoomies;
             if (zoomies && !s.zoomies) {

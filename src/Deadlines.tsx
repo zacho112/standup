@@ -8,7 +8,7 @@ const BAR_WIDTH = 14;
 const HORIZON_DAYS = 30;
 
 function urgency(days: number) {
-    if (days < 0) return "passed";
+    if (days < 0) return "overdue";
     if (days === 0) return "today";
     if (days <= 3) return "hot";
     if (days <= 7) return "warm";
@@ -16,8 +16,8 @@ function urgency(days: number) {
 }
 
 function countdown(days: number, terminal: boolean) {
-    if (terminal) return days < 0 ? `T+${-days}d` : `T-${days}d`;
-    if (days < 0) return days === -1 ? "yesterday" : `${-days} days ago`;
+    if (terminal) return days < 0 ? `OVERDUE T+${-days}d` : `T-${days}d`;
+    if (days < 0) return days === -1 ? "1 day overdue" : `${-days} days overdue`;
     if (days === 0) return "today!";
     if (days === 1) return "tomorrow";
     if (days < 14) return `in ${days} days`;
@@ -65,6 +65,7 @@ export function Deadlines({ state, update, meName }: RoomApi & { meName: string 
                     {items.map((d) => {
                         const level = urgency(d.days);
                         const fill = d.days < 0 ? 1 : 1 - Math.min(d.days, HORIZON_DAYS) / HORIZON_DAYS;
+                        const filled = Math.round(fill * BAR_WIDTH);
                         return (
                             <li key={d.id} className={level} title={`Added by ${d.author}`}>
                                 <div className="deadline-head">
@@ -77,8 +78,8 @@ export function Deadlines({ state, update, meName }: RoomApi & { meName: string 
                                 </div>
                                 {theme.terminal ? (
                                     <div className="bar">
-                                        [{"█".repeat(Math.round(fill * BAR_WIDTH))}
-                                        {"░".repeat(BAR_WIDTH - Math.round(fill * BAR_WIDTH))}]
+                                        [<span className="fill">{"█".repeat(filled)}</span>
+                                        <span className="empty">{"·".repeat(BAR_WIDTH - filled)}</span>]
                                     </div>
                                 ) : (
                                     <div className="progress">
