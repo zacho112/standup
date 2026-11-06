@@ -879,3 +879,88 @@ input[type="checkbox"] {
     animation: none !important;
   }
 }
+
+/* Roaming kitten */
+[data-theme="kitten"] .app {
+  padding-bottom: 4rem;
+}
+.kitten-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0.3rem;
+  height: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.kitten,
+.yarn {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  font-size: 2.2rem;
+  line-height: 1;
+  user-select: none;
+}
+.yarn {
+  font-size: 1.4rem;
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.kitten {
+  pointer-events: auto;
+  cursor: grab;
+}
+.kitten .facing,
+.kitten .sprite {
+  display: inline-block;
+}
+.kitten.walk .sprite {
+  animation: trot 0.45s ease-in-out infinite;
+}
+.kitten.walk.zoomies .sprite {
+  animation-duration: 0.15s;
+}
+.kitten.nap .sprite {
+  filter: saturate(0.6);
+  transform: rotate(-8deg) translateY(4px);
+}
+.kitten .sprite.jump {
+  animation: hop 0.5s ease-out;
+}
+@keyframes trot {
+  50% {
+    transform: translateY(-4px) rotate(-3deg);
+  }
+}
+@keyframes hop {
+  40% {
+    transform: translateY(-28px) rotate(-12deg);
+  }
+}
+.kitten .bubble {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.6rem;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.kitten .zzz {
+  position: absolute;
+  bottom: 90%;
+  right: -0.6em;
+  font-size: 1rem;
+  animation: drift 2s ease-in-out infinite;
+}
+@keyframes drift {
+  50% {
+    transform: translate(4px, -6px);
+    opacity: 0.5;
+  }
+}

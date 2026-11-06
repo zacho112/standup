@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EggTimer } from "./EggTimer";
 import { KeyBar, type HotKey } from "./KeyBar";
+import { Kitten } from "./Kitten";
 import { ParkingLot } from "./ParkingLot";
 import { People } from "./People";
 import { usePrefs } from "./prefs";
@@ -185,6 +186,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
         <ParkingLot {...room} meName={me.name} nudge={step === "topics"} onTopicsDone={markTopicsDone} />
       </main>
       {theme.terminal && <KeyBar keys={hotKeys} onDigit={(n) => update((s) => toggleMood(s, me.id, n))} />}
+      {prefs.theme === "kitten" && <Kitten timer={state.timer} />}
     </div>
   );
 }
