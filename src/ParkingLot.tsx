@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrefs } from "./prefs";
 import { ARCHIVE_DAYS, addTopic, stamp, type ParkingItem } from "./state";
 import type { RoomApi } from "./useRoom";
 
 const formatDate = (ts: number) => new Date(ts).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
-export function ParkingLot({ state, update, meName }: RoomApi & { meName: string }) {
+export function ParkingLot({
+  state,
+  update,
+  meName,
+  nudge,
+  onTopicsDone,
+}: RoomApi & { meName: string; nudge: boolean; onTopicsDone: () => void }) {
   const { theme } = usePrefs();
   const [text, setText] = useState("");
   const [needsLT, setNeedsLT] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (nudge) inputRef.current?.focus();
+  }, [nudge]);
   const live = Object.values(state.parking).filter((i) => !i.deleted);
   const items = live
     .filter((i) => i.archivedAt === null)
@@ -31,6 +42,7 @@ export function ParkingLot({ state, update, meName }: RoomApi & { meName: string
     update((s) => addTopic(s, trimmed, needsLT, meName));
     setText("");
     setNeedsLT(false);
+    onTopicsDone();
   };
 
   const archiveDone = () =>
@@ -58,13 +70,15 @@ export function ParkingLot({ state, update, meName }: RoomApi & { meName: string
         )}
       </h2>
       <form
-        className="add-form"
+        className={nudge ? "add-form nudge" : "add-form"}
         onSubmit={(e) => {
           e.preventDefault();
           add();
         }}
       >
+        {nudge && <span className="nudge-label">{theme.nudgeTopics}</span>}
         <input
+          ref={inputRef}
           id="parking-input"
           type="text"
           placeholder={theme.placeholder}
@@ -78,6 +92,11 @@ export function ParkingLot({ state, update, meName }: RoomApi & { meName: string
         <button className="primary" disabled={!text.trim()}>
           add
         </button>
+        {nudge && (
+          <button type="button" onClick={onTopicsDone}>
+            {theme.nudgeSkip}
+          </button>
+        )}
       </form>
       {items.length === 0 ? (
         <p className="muted">{theme.empty}</p>

@@ -2,7 +2,7 @@ import { usePrefs } from "./prefs";
 import { currentSpeaker, enqueue, moodOf, patchPerson, toggleMood } from "./state";
 import type { RoomApi } from "./useRoom";
 
-export function People({ state, online, update, meId }: RoomApi & { meId: string }) {
+export function People({ state, online, update, meId, nudge }: RoomApi & { meId: string; nudge: boolean }) {
   const { theme } = usePrefs();
   const t = state.timer;
   const speakerId = currentSpeaker(t);
@@ -19,7 +19,8 @@ export function People({ state, online, update, meId }: RoomApi & { meId: string
       <h2>
         {theme.team} {avg && <span title="Average mood today">{avg}</span>}
       </h2>
-      <div className="mood-picker">
+      <div className={nudge ? "mood-picker nudge" : "mood-picker"}>
+        {nudge && <span className="nudge-label">{theme.nudgeMood}</span>}
         <span className="muted">{theme.moodPrompt}</span>
         {theme.moods.map((face, i) => (
           <button key={face} className={myMood === i ? "selected" : ""} onClick={() => update((s) => toggleMood(s, meId, i))}>

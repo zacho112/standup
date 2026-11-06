@@ -380,6 +380,34 @@ input[type="checkbox"] {
   display: none;
 }
 
+/* Step-by-step nudge: mood first, then discussion topics */
+@keyframes nudge {
+  50% {
+    outline-color: transparent;
+  }
+}
+.nudge {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+  border-radius: 10px;
+  animation: nudge 1.6s ease-in-out infinite;
+}
+.nudge-label {
+  flex-basis: 100%;
+  font-weight: 700;
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nudge {
+    animation: none;
+  }
+}
+[data-theme="hacker"] .nudge {
+  outline-style: dashed;
+  border-radius: 0;
+  animation-timing-function: steps(1);
+}
+
 /* ---------- Hacker theme ---------- */
 @keyframes blink {
   50% {

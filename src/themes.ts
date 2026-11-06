@@ -21,6 +21,9 @@ export type Theme = {
   user: string;
   room: string;
   joinHint: string;
+  nudgeMood: string;
+  nudgeTopics: string;
+  nudgeSkip: string;
 };
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -44,6 +47,9 @@ export const THEMES: Record<ThemeName, Theme> = {
     user: "user:",
     room: "room:",
     joinHint: "// everyone in the same room joins the same standup",
+    nudgeMood: "step 1/2 → set your mood (or press 1-5)",
+    nudgeTopics: "step 2/2 → anything to discuss after standup?",
+    nudgeSkip: "nothing from me",
   },
   default: {
     name: "default",
@@ -65,6 +71,9 @@ export const THEMES: Record<ThemeName, Theme> = {
     user: "Your name",
     room: "Room",
     joinHint: "Everyone who opens the same room joins the same standup.",
+    nudgeMood: "👉 Step 1 of 2: set your mood",
+    nudgeTopics: "👉 Step 2 of 2: any discussion topics?",
+    nudgeSkip: "nothing from me",
   },
   unicorn: {
     name: "unicorn",
@@ -86,6 +95,9 @@ export const THEMES: Record<ThemeName, Theme> = {
     user: "Your unicorn name",
     room: "Meadow",
     joinHint: "All unicorns in the same meadow share the magic.",
+    nudgeMood: "✨ Step 1 of 2: share your sparkle",
+    nudgeTopics: "✨ Step 2 of 2: any magical topics?",
+    nudgeSkip: "nothing from me 🦄",
   },
   kitten: {
     name: "kitten",
@@ -107,6 +119,9 @@ export const THEMES: Record<ThemeName, Theme> = {
     user: "Your cat name",
     room: "Cat café",
     joinHint: "Every kitty in the same café joins the same standup.",
+    nudgeMood: "🐾 Step 1 of 2: how's your purr?",
+    nudgeTopics: "🐾 Step 2 of 2: anything to paw at?",
+    nudgeSkip: "nothing, just napping 😴",
   },
 };
 

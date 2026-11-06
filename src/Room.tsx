@@ -9,6 +9,8 @@ import {
   addTopic,
   currentSpeaker,
   freshStandup,
+  isToday,
+  moodOf,
   nextSpeaker,
   onlineCandidates,
   resetTimer,
@@ -28,6 +30,15 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
   const [copied, setCopied] = useState(false);
   const self = state.people[me.id];
   const needsRegister = !self || self.deleted || self.name !== me.name;
+
+  const topicsKey = "standup-topics-" + roomId;
+  const [topicsDoneAt, setTopicsDoneAt] = useState(() => Number(localStorage.getItem(topicsKey)) || 0);
+  const markTopicsDone = () => {
+    const now = Date.now();
+    localStorage.setItem(topicsKey, String(now));
+    setTopicsDoneAt(now);
+  };
+  const step = !self || moodOf(self) === null ? "mood" : !isToday(topicsDoneAt) ? "topics" : null;
 
   // Also re-adds us if a peer removed us while we're here.
   useEffect(() => {
@@ -103,6 +114,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
         const text = (needsLT ? args.slice(1) : args).join(" ").slice(0, 300);
         if (!text) return "usage: park [--lt] <topic>";
         update((s) => addTopic(s, text, needsLT, me.name));
+        markTopicsDone();
         return `parked: ${text}${needsLT ? " [LT]" : ""}`;
       },
     },
@@ -169,8 +181,8 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
       </header>
       <main className="grid">
         <EggTimer {...room} />
-        <People {...room} meId={me.id} />
-        <ParkingLot {...room} meName={me.name} />
+        <People {...room} meId={me.id} nudge={step === "mood"} />
+        <ParkingLot {...room} meName={me.name} nudge={step === "topics"} onTopicsDone={markTopicsDone} />
       </main>
       {theme.terminal && <KeyBar keys={hotKeys} onDigit={(n) => update((s) => toggleMood(s, me.id, n))} />}
     </div>
