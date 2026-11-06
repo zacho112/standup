@@ -1,0 +1,120 @@
+/* Default theme */
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+  color-scheme: light dark;
+  --bg: #f4f5f7;
+  --card: #fff;
+  --text: #1d2330;
+  --muted: #6b7280;
+  --dim: #a0a6b1;
+  --border: #e3e5ea;
+  --accent: #2563eb;
+  --on-accent: #fff;
+  --amber: #d97706;
+  --red: #dc2626;
+  --lt: #7c3aed;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]),
+  :root[data-theme="default"] {
+    --bg: #111418;
+    --card: #1b1f26;
+    --text: #e8eaed;
+    --muted: #9aa3af;
+    --dim: #5b636f;
+    --border: #2a303a;
+  }
+}
+
+:root[data-theme="hacker"] {
+  font-family: ui-monospace, "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  font-size: 15px;
+  color-scheme: dark;
+  --bg: #050805;
+  --card: #0a110a;
+  --text: #33ff66;
+  --muted: #1fa347;
+  --dim: #135a26;
+  --border: #1a5c2b;
+  --accent: #33ff66;
+  --on-accent: #050805;
+  --amber: #ffb000;
+  --red: #ff3b3b;
+  --lt: #00e5ff;
+}
+
+:root[data-theme="unicorn"] {
+  font-family: ui-rounded, "Nunito", "Quicksand", system-ui, sans-serif;
+  color-scheme: light;
+  --bg: #fff5fb;
+  --card: rgba(255, 255, 255, 0.82);
+  --text: #5b2a86;
+  --muted: #a26fc7;
+  --dim: #cfb3e6;
+  --border: #f3c4ec;
+  --accent: #ff5fc8;
+  --on-accent: #fff;
+  --amber: #ff9f43;
+  --red: #ff4d6d;
+  --lt: #6c5ce7;
+  --runner: "🦄";
+  --rainbow: linear-gradient(90deg, #ff6ec7, #ffb86b, #ffe66d, #7cf29c, #5ec8ff, #a77bff);
+}
+
+:root[data-theme="kitten"] {
+  font-family: ui-rounded, "Nunito", system-ui, sans-serif;
+  color-scheme: light;
+  --bg: #fdf6ee;
+  --card: #fffaf4;
+  --text: #5a3e2b;
+  --muted: #9c7b63;
+  --dim: #cdb8a5;
+  --border: #efdcc8;
+  --accent: #f28c8c;
+  --on-accent: #fff;
+  --amber: #e8a33d;
+  --red: #d9534f;
+  --lt: #8e7cc3;
+  --runner: "🐈";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+  text-shadow: none;
+}
+
+/* CRT effect (hacker theme only) */
+[data-theme="hacker"][data-crt="on"] body {
+  background: radial-gradient(ellipse at center, #0b160b 0%, var(--bg) 75%) fixed;
+  text-shadow: 0 0 4px color-mix(in srgb, currentColor 55%, transparent);
+}
+[data-theme="hacker"][data-crt="on"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.28) 2px 3px);
+}
