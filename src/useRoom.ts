@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { joinRoom } from "trystero";
+import { connectRelay } from "./relay";
 import { emptyState, merge, sanitize, type RoomState } from "./state";
-
-const APP_ID = "team-standup-pad";
-
-type SyncMessage = { personId: string; state: RoomState };
 
 export type RoomApi = {
   state: RoomState;
   online: Set<string>;
+  linked: boolean;
   update: (fn: (s: RoomState) => RoomState) => void;
 };
 
@@ -24,8 +21,9 @@ export function useRoom(roomId: string, meId: string, connected: boolean): RoomA
   const storageKey = "standup-room-" + roomId;
   const [state, setState] = useState(() => load(storageKey));
   const [peerPeople, setPeerPeople] = useState<Record<string, string>>({});
+  const [linked, setLinked] = useState(false);
   const stateRef = useRef(state);
-  const broadcastRef = useRef<(s: RoomState) => void>(() => {});
+  const broadcastRef = useRef<() => void>(() => {});
 
   const commit = useCallback(
     (next: RoomState) => {
@@ -41,41 +39,43 @@ export function useRoom(roomId: string, meId: string, connected: boolean): RoomA
       const next = fn(stateRef.current);
       if (next === stateRef.current) return;
       commit(next);
-      broadcastRef.current(next);
+      broadcastRef.current();
     },
     [commit],
   );
 
   useEffect(() => {
     if (!connected) return;
-    const room = joinRoom({ appId: APP_ID }, roomId);
-    const sync = room.makeAction<SyncMessage>("sync", {
-      onMessage: (msg, { peerId }) => {
+    const snapshot = () => ({ personId: meId, state: stateRef.current });
+    const conn = connectRelay(roomId, {
+      onReady: () => conn.send(snapshot(), null),
+      onPeerJoin: (peer) => conn.send(snapshot(), peer),
+      onPeerLeave: (peer) =>
+        setPeerPeople((p) => {
+          const next = { ...p };
+          delete next[peer];
+          return next;
+        }),
+      onMessage: (data, from) => {
+        const msg = data as { personId?: unknown; state?: unknown } | null;
         const remote = sanitize(msg?.state);
-        if (!remote || typeof msg.personId !== "string") return;
-        setPeerPeople((p) => (p[peerId] === msg.personId ? p : { ...p, [peerId]: msg.personId }));
+        const personId = msg?.personId;
+        if (!remote || typeof personId !== "string") return;
+        setPeerPeople((p) => (p[from] === personId ? p : { ...p, [from]: personId }));
         commit(merge(stateRef.current, remote));
       },
+      onLinkChange: setLinked,
     });
-    const send = (target: string | null) =>
-      sync.send({ personId: meId, state: stateRef.current }, { target }).catch(console.warn);
-
-    room.onPeerJoin = (peerId) => send(peerId);
-    room.onPeerLeave = (peerId) =>
-      setPeerPeople((p) => {
-        const next = { ...p };
-        delete next[peerId];
-        return next;
-      });
-    broadcastRef.current = () => send(null);
+    broadcastRef.current = () => conn.send(snapshot(), null);
 
     return () => {
       broadcastRef.current = () => {};
       setPeerPeople({});
-      void room.leave();
+      setLinked(false);
+      conn.close();
     };
   }, [roomId, meId, commit, connected]);
 
   const online = useMemo(() => new Set([meId, ...Object.values(peerPeople)]), [meId, peerPeople]);
-  return { state, online, update };
+  return { state, online, linked, update };
 }

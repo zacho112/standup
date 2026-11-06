@@ -23,6 +23,7 @@ import {
 } from "./state";
 import { THEME_NAMES, THEMES, type ThemeName } from "./themes";
 import { useRoom } from "./useRoom";
+import { relayConfigured } from "./relay";
 
 const SESSION_MS = 60 * 60 * 1000;
 
@@ -30,7 +31,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
   const [sessionStart, setSessionStart] = useState(() => Date.now());
   const [expired, setExpired] = useState(false);
   const room = useRoom(roomId, me.id, !expired);
-  const { state, online, update } = room;
+  const { state, online, linked, update } = room;
   const { prefs, setPrefs, theme } = usePrefs();
   const [copied, setCopied] = useState(false);
   const self = state.people[me.id];
@@ -203,8 +204,14 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
         <button onClick={newStandup}>new standup</button>
         <span className="spacer" />
         <span className="status">
-          <span className="dot" />
-          {theme.terminal ? `peers: ${online.size}` : `${online.size} online`}
+          <span className={linked ? "dot" : "dot off"} />
+          {!relayConfigured
+            ? "local only"
+            : !linked
+              ? "connecting…"
+              : theme.terminal
+                ? `peers: ${online.size}`
+                : `${online.size} online`}
         </span>
         <span>{me.name}</span>
         <select value={prefs.theme} onChange={(e) => setPrefs({ ...prefs, theme: e.target.value as ThemeName })} title="Theme">

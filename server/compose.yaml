@@ -1,0 +1,16 @@
+services:
+  relay:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: "8787"
+      # Comma-separated list of sites allowed to connect.
+      ALLOWED_ORIGINS: "https://zacho112.github.io"
+      # nginx sits in front and sets X-Forwarded-For.
+      TRUST_PROXY: "1"
+    # Only reachable from the VPS itself; nginx handles the public side with TLS.
+    ports:
+      - "127.0.0.1:8787:8787"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]

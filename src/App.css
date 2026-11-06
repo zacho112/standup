@@ -36,6 +36,9 @@ header.top h1 {
   border-radius: 50%;
   background: #16a34a;
 }
+.dot.off {
+  background: var(--amber) !important;
+}
 
 .grid {
   display: grid;

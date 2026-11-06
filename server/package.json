@@ -1,0 +1,17 @@
+{
+  "name": "standup-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stateless, end-to-end encrypted WebSocket relay for the standup pad",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.22.1"
+  }
+}

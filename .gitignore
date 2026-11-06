@@ -19,6 +19,9 @@ coverage
 .env.*
 !.env.example
 
+# Hosting-specific config stays private
+server/nginx*.conf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
