@@ -20,7 +20,7 @@ function load(key: string): RoomState {
   }
 }
 
-export function useRoom(roomId: string, meId: string): RoomApi {
+export function useRoom(roomId: string, meId: string, connected: boolean): RoomApi {
   const storageKey = "standup-room-" + roomId;
   const [state, setState] = useState(() => load(storageKey));
   const [peerPeople, setPeerPeople] = useState<Record<string, string>>({});
@@ -47,6 +47,7 @@ export function useRoom(roomId: string, meId: string): RoomApi {
   );
 
   useEffect(() => {
+    if (!connected) return;
     const room = joinRoom({ appId: APP_ID }, roomId);
     const sync = room.makeAction<SyncMessage>("sync", {
       onMessage: (msg, { peerId }) => {
@@ -70,9 +71,10 @@ export function useRoom(roomId: string, meId: string): RoomApi {
 
     return () => {
       broadcastRef.current = () => {};
+      setPeerPeople({});
       void room.leave();
     };
-  }, [roomId, meId, commit]);
+  }, [roomId, meId, commit, connected]);
 
   const online = useMemo(() => new Set([meId, ...Object.values(peerPeople)]), [meId, peerPeople]);
   return { state, online, update };

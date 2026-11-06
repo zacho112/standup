@@ -24,6 +24,7 @@ export type Theme = {
   nudgeMood: string;
   nudgeTopics: string;
   nudgeSkip: string;
+  sessionEnded: string;
 };
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -50,6 +51,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     nudgeMood: "step 1/2 → set your mood (or press 1-5)",
     nudgeTopics: "step 2/2 → anything to discuss after standup?",
     nudgeSkip: "nothing from me",
+    sessionEnded: "connection closed by remote host",
   },
   default: {
     name: "default",
@@ -74,6 +76,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     nudgeMood: "👉 Step 1 of 2: set your mood",
     nudgeTopics: "👉 Step 2 of 2: any discussion topics?",
     nudgeSkip: "nothing from me",
+    sessionEnded: "Session ended",
   },
   unicorn: {
     name: "unicorn",
@@ -98,6 +101,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     nudgeMood: "✨ Step 1 of 2: share your sparkle",
     nudgeTopics: "✨ Step 2 of 2: any magical topics?",
     nudgeSkip: "nothing from me 🦄",
+    sessionEnded: "✨ The magic wore off",
   },
   kitten: {
     name: "kitten",
@@ -122,6 +126,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     nudgeMood: "🐾 Step 1 of 2: how's your purr?",
     nudgeTopics: "🐾 Step 2 of 2: anything to paw at?",
     nudgeSkip: "nothing, just napping 😴",
+    sessionEnded: "😴 The kitten fell asleep",
   },
 };
 

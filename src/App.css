@@ -380,6 +380,16 @@ input[type="checkbox"] {
   display: none;
 }
 
+.session-ended {
+  max-width: 480px;
+  margin: 18vh auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  text-align: center;
+}
+
 /* Step-by-step nudge: mood first, then discussion topics */
 @keyframes nudge {
   50% {

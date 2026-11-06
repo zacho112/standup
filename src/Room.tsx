@@ -24,8 +24,12 @@ import {
 import { THEME_NAMES, THEMES, type ThemeName } from "./themes";
 import { useRoom } from "./useRoom";
 
+const SESSION_MS = 60 * 60 * 1000;
+
 export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave: () => void }) {
-  const room = useRoom(roomId, me.id);
+  const [sessionStart, setSessionStart] = useState(() => Date.now());
+  const [expired, setExpired] = useState(false);
+  const room = useRoom(roomId, me.id, !expired);
   const { state, online, update } = room;
   const { prefs, setPrefs, theme } = usePrefs();
   const [copied, setCopied] = useState(false);
@@ -40,6 +44,20 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
     setTopicsDoneAt(now);
   };
   const step = !self || moodOf(self) === null ? "mood" : !isToday(topicsDoneAt) ? "topics" : null;
+
+  // Polls a deadline instead of one long setTimeout, which can drift when a laptop sleeps.
+  useEffect(() => {
+    if (expired) return;
+    const id = setInterval(() => {
+      if (Date.now() - sessionStart > SESSION_MS) setExpired(true);
+    }, 15_000);
+    return () => clearInterval(id);
+  }, [expired, sessionStart]);
+
+  const reconnect = () => {
+    setSessionStart(Date.now());
+    setExpired(false);
+  };
 
   // Also re-adds us if a peer removed us while we're here.
   useEffect(() => {
@@ -144,6 +162,25 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
     { names: ["whoami"], help: "", run: () => me.name },
     { names: ["sudo"], help: "", hidden: true, run: () => `${me.name} is not in the sudoers file. This incident will be reported.` },
   ];
+
+  if (expired) {
+    return (
+      <div className="app">
+        <section className="card session-ended">
+          <h2>{theme.sessionEnded}</h2>
+          <p className="muted">
+            Disconnected after {SESSION_MS / 60_000} minutes, so an open tab doesn't keep sharing your standup.
+          </p>
+          <div className="controls">
+            <button className="primary" onClick={reconnect}>
+              reconnect
+            </button>
+            <button onClick={onLeave}>leave</button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
