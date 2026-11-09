@@ -235,7 +235,10 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                     <Shell
                         prompt={
                             <>
-                                <span className="host">standup@{roomId}</span>:~$
+                                <span className="host">
+                                    {me.name.toLowerCase().replace(/\s+/g, "")}@{roomId}
+                                </span>
+                                :~$
                             </>
                         }
                         commands={commands}
@@ -245,8 +248,9 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                         {theme.title} <span className="room-id">#{roomId}</span>
                     </h1>
                 )}
-                <button onClick={copyLink}>{copied ? "copied!" : "copy link"}</button>
-                <button onClick={newStandup}>new standup</button>
+                <button onClick={copyLink} title="Copy link to this board">
+                    {copied ? "✓ copied" : "🔗 link"}
+                </button>
                 <details className="board-settings" ref={settingsRef}>
                     <summary>⚙️ board</summary>
                     <div className="board-settings-menu">
@@ -256,7 +260,16 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                         </label>
                         <p className="muted">Applies to everyone on this board.</p>
                         <button
-                            className="retake-tour"
+                            className="menu-action"
+                            onClick={() => {
+                                if (settingsRef.current) settingsRef.current.open = false;
+                                newStandup();
+                            }}
+                        >
+                            🔄 New standup
+                        </button>
+                        <button
+                            className="menu-action"
                             onClick={() => {
                                 if (settingsRef.current) settingsRef.current.open = false;
                                 setGuideStep(0);
@@ -277,7 +290,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                                 ? `peers: ${online.size}`
                                 : `${online.size} online`}
                 </span>
-                <span>{me.name}</span>
+                {!theme.terminal && <span className="me-name">{me.name}</span>}
                 <label className="theme-picker">
                     <select value={prefs.theme} onChange={(e) => setPrefs({ ...prefs, theme: e.target.value as ThemeName })} aria-label="Theme">
                         {THEME_NAMES.map((n) => (

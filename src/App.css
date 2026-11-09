@@ -8,9 +8,33 @@
 header.top {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
     margin-bottom: 1.5rem;
+}
+
+header.top > h1 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    header.top .me-name {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    header.top > h1 {
+        font-size: 1.1rem !important;
+    }
+
+    header.top .room-id {
+        max-width: 10ch;
+    }
 }
 
 header.top h1 {
@@ -84,6 +108,10 @@ header .theme-picker select option {
     font-family: ui-monospace, monospace;
     font-weight: normal;
     color: var(--muted);
+    max-width: 16ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .spacer {
@@ -110,12 +138,10 @@ header .theme-picker select option {
 
 .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     grid-template-areas:
         "timer people"
-        "timer deadlines"
-        "parking parking";
-    align-items: start;
+        "parking deadlines";
     gap: 1.25rem;
 }
 
@@ -142,19 +168,18 @@ header .theme-picker select option {
 .grid.with-status {
     grid-template-areas:
         "timer people"
-        "timer status"
-        "timer deadlines"
-        "parking parking";
+        "status status"
+        "parking deadlines";
 }
 
 @media (max-width: 760px) {
     .grid {
         grid-template-columns: 1fr;
-        grid-template-areas: "timer" "people" "deadlines" "parking";
+        grid-template-areas: "timer" "people" "parking" "deadlines";
     }
 
     .grid.with-status {
-        grid-template-areas: "timer" "people" "status" "deadlines" "parking";
+        grid-template-areas: "timer" "people" "status" "parking" "deadlines";
     }
 }
 
@@ -499,12 +524,23 @@ input[type="checkbox"] {
     min-width: 0;
 }
 
-/* "Working on today" box */
+/* "Working on today" box: your line on the left, the team's in columns on the right */
+.status-box {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+    column-gap: 1.5rem;
+    align-items: start;
+}
+
+.status-box > h2,
+.status-box > .status-note {
+    grid-column: 1 / -1;
+}
+
 .my-status {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    margin-bottom: 0.9rem;
 }
 
 .my-status .doing-input {
@@ -513,20 +549,25 @@ input[type="checkbox"] {
     padding: 0.55rem 0.8rem;
 }
 
+.status-box > .muted {
+    margin: 1.6rem 0 0;
+}
+
 .status-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem 1.2rem;
 }
 
 .status-list li {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.2rem 0.6rem;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--border);
 }
 
 .status-list li.offline {
@@ -535,12 +576,24 @@ input[type="checkbox"] {
 
 .status-list .who {
     font-weight: 700;
-    min-width: 6rem;
 }
 
 .status-list .what {
-    flex: 1;
     overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+    .status-box {
+        grid-template-columns: 1fr;
+    }
+
+    .status-box > .muted {
+        margin-top: 0.9rem;
+    }
+
+    .status-list {
+        margin-top: 0.9rem;
+    }
 }
 
 .status-list .stale {
@@ -601,10 +654,15 @@ input[type="checkbox"] {
     font-size: 0.8rem;
 }
 
-.board-settings-menu .retake-tour {
+.board-settings-menu .menu-action {
     display: block;
-    margin-top: 0.8rem;
     width: 100%;
+    margin-top: 0.6rem;
+    text-align: left;
+}
+
+.board-settings-menu p + .menu-action {
+    margin-top: 0.9rem;
 }
 
 [data-theme="hacker"] .board-settings summary,
@@ -1064,6 +1122,21 @@ input[type="checkbox"] {
         font-size: 1.15rem;
     }
 
+    @media (max-width: 1000px) {
+        .shell h1,
+        header.top .shell input[type="text"] {
+            font-size: 1rem;
+        }
+
+        .host {
+            max-width: 14ch;
+        }
+
+        header.top .shell input[type="text"] {
+            width: 8ch;
+        }
+    }
+
     .shell-out {
         order: 99;
         flex-basis: 100%;
@@ -1081,6 +1154,11 @@ input[type="checkbox"] {
 
     .host {
         color: var(--lt);
+        display: inline-block;
+        max-width: 24ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: bottom;
     }
 
     .dot {
