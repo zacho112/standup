@@ -2,6 +2,7 @@ export type ThemeName = "hacker" | "default" | "unicorn" | "kitten" | "raid" | "
 
 export type Theme = {
     name: string;
+    icon: string;
     // Terminal chrome: shell prompt header, ASCII progress bar and the F-key bar.
     terminal: boolean;
     title: string;
@@ -34,6 +35,8 @@ export type Theme = {
     ltNeeded: string;
     statusToggle: string;
     statusPlaceholder: string;
+    statusTitle: string;
+    statusEmpty: string;
     yourTurn: string;
     turnDone: string;
     topicCovered: string;
@@ -45,6 +48,7 @@ export type Theme = {
 export const THEMES: Record<ThemeName, Theme> = {
     hacker: {
         name: "hacker",
+        icon: "💻",
         terminal: true,
         title: "standup",
         moods: ["x_x", ":(", ":|", ":)", ":D"],
@@ -75,6 +79,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "requires root",
         statusToggle: "ps aux  # show what everyone is doing",
         statusPlaceholder: "> echo $DOING",
+        statusTitle: "ps aux --today",
+        statusEmpty: "// no processes reported yet",
         yourTurn: ">> your turn <<",
         turnDone: "exit 0 → next",
         topicCovered: "ok",
@@ -83,6 +89,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     },
     default: {
         name: "default",
+        icon: "☀️",
         terminal: false,
         title: "Standup",
         moods: ["😫", "😕", "😐", "🙂", "😄"],
@@ -113,6 +120,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "LT needed",
         statusToggle: "Show what everyone is working on",
         statusPlaceholder: "What are you working on?",
+        statusTitle: "Working on today",
+        statusEmpty: "Nobody has shared yet.",
         yourTurn: "Your turn!",
         turnDone: "I'm done → next",
         topicCovered: "✓ Covered",
@@ -121,6 +130,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     },
     unicorn: {
         name: "unicorn",
+        icon: "🦄",
         terminal: false,
         title: "🦄 Standup ✨",
         moods: ["😭", "🌧️", "☁️", "🌈", "🦄"],
@@ -151,6 +161,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "LT needed",
         statusToggle: "✨ Show what everyone is conjuring",
         statusPlaceholder: "What magic are you making?",
+        statusTitle: "✨ Today's magic",
+        statusEmpty: "No magic shared yet ✨",
         yourTurn: "✨ Your turn to shine! ✨",
         turnDone: "✨ Done, pass the magic →",
         topicCovered: "✨ Covered",
@@ -159,6 +171,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     },
     kitten: {
         name: "kitten",
+        icon: "🐱",
         terminal: false,
         title: "🐾 Standup",
         moods: ["😿", "😾", "🐱", "😺", "😻"],
@@ -189,6 +202,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "LT needed",
         statusToggle: "🐾 Show what everyone is chasing",
         statusPlaceholder: "What are you chasing?",
+        statusTitle: "🐾 Chasing today",
+        statusEmpty: "Every kitty is still napping.",
         yourTurn: "🐾 Your turn, kitty!",
         turnDone: "🐾 Done, next kitty →",
         topicCovered: "🐾 Covered",
@@ -197,6 +212,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     },
     raid: {
         name: "raid night",
+        icon: "⚔️",
         terminal: false,
         title: "⚔️ Standup",
         moods: ["💀", "🩹", "🛡️", "⚔️", "🏆"],
@@ -227,6 +243,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "raid lead needed",
         statusToggle: "📜 Show everyone's current quest",
         statusPlaceholder: "Current quest?",
+        statusTitle: "📜 Current quests",
+        statusEmpty: "No quests accepted yet.",
         yourTurn: "⚔️ You have aggro!",
         turnDone: "Pass aggro →",
         topicCovered: "✓ Done",
@@ -235,6 +253,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     },
     rock: {
         name: "rock",
+        icon: "🎸",
         terminal: false,
         title: "🎸 Standup",
         moods: ["🔇", "😵", "🎵", "🎸", "🤘"],
@@ -265,6 +284,8 @@ export const THEMES: Record<ThemeName, Theme> = {
         ltNeeded: "management needed",
         statusToggle: "🎵 Show what everyone is jamming on",
         statusPlaceholder: "What are you jamming on?",
+        statusTitle: "🎵 Now jamming",
+        statusEmpty: "Nobody's jamming yet.",
         yourTurn: "🎤 You're on stage!",
         turnDone: "Drop the mic →",
         topicCovered: "🤘 Nailed it",

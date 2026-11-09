@@ -18,6 +18,68 @@ header.top h1 {
     font-size: 1.3rem;
 }
 
+.theme-picker {
+    position: relative;
+    display: inline-flex;
+}
+
+.theme-picker::after {
+    content: "▾";
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--on-accent);
+    font-size: 0.8rem;
+}
+
+header .theme-picker select {
+    appearance: none;
+    cursor: pointer;
+    padding: 0.4rem 2rem 0.4rem 0.85rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--lt)));
+    color: var(--on-accent);
+    font-weight: 700;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+header .theme-picker select:hover,
+header .theme-picker select:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 50%, transparent);
+    outline: none;
+}
+
+header .theme-picker select option {
+    background: var(--card);
+    color: var(--text);
+}
+
+[data-theme="hacker"] header .theme-picker select {
+    border-radius: 0;
+    border: 1px solid var(--text);
+    background: transparent;
+    color: var(--text);
+    box-shadow: none;
+}
+
+[data-theme="hacker"] header .theme-picker select:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+[data-theme="hacker"] .theme-picker::after {
+    color: inherit;
+}
+
+[data-theme="hacker"] .theme-picker:hover::after {
+    color: var(--bg);
+}
+
 .room-id {
     font-family: ui-monospace, monospace;
     font-weight: normal;
@@ -73,10 +135,26 @@ header.top h1 {
     grid-area: parking;
 }
 
+.status-box {
+    grid-area: status;
+}
+
+.grid.with-status {
+    grid-template-areas:
+        "timer people"
+        "timer status"
+        "timer deadlines"
+        "parking parking";
+}
+
 @media (max-width: 760px) {
     .grid {
         grid-template-columns: 1fr;
         grid-template-areas: "timer" "people" "deadlines" "parking";
+    }
+
+    .grid.with-status {
+        grid-template-areas: "timer" "people" "status" "deadlines" "parking";
     }
 }
 
@@ -270,15 +348,20 @@ input[type="checkbox"] {
 }
 
 @keyframes shake {
-    0%, 20%, 100% {
+
+    0%,
+    20%,
+    100% {
         transform: none;
     }
 
-    4%, 12% {
+    4%,
+    12% {
         transform: translateX(-5px);
     }
 
-    8%, 16% {
+    8%,
+    16% {
         transform: translateX(5px);
     }
 }
@@ -296,6 +379,7 @@ input[type="checkbox"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .clock .time,
     .timer,
     .hurry,
@@ -415,32 +499,198 @@ input[type="checkbox"] {
     min-width: 0;
 }
 
-.people .doing,
-.people .doing-input {
-    display: block;
-    margin-top: 0.15rem;
-    font-size: 0.85rem;
+/* "Working on today" box */
+.my-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.9rem;
 }
 
-.people .doing {
-    color: var(--muted);
+.my-status .doing-input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.55rem 0.8rem;
+}
+
+.status-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.status-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+}
+
+.status-list li.offline {
+    opacity: 0.55;
+}
+
+.status-list .who {
+    font-weight: 700;
+    min-width: 6rem;
+}
+
+.status-list .what {
+    flex: 1;
     overflow-wrap: anywhere;
 }
 
-.people .doing .stale {
+.status-list .stale {
+    font-size: 0.8rem;
     color: var(--dim);
 }
 
-.people .doing-input {
-    width: 100%;
-    padding: 0.2rem 0.5rem;
+.status-note {
+    margin: 0.9rem 0 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+    opacity: 0.8;
 }
 
-.status-toggle {
-    margin-top: 0.9rem;
-    font-size: 0.85rem;
-    color: var(--muted);
+/* Board-wide settings in the header */
+.board-settings {
+    position: relative;
+}
+
+.board-settings summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.board-settings summary::-webkit-details-marker {
+    display: none;
+}
+
+.board-settings[open] summary,
+.board-settings summary:hover {
+    border-color: var(--accent);
+}
+
+.board-settings-menu {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    z-index: 70;
+    width: max-content;
+    max-width: 320px;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.board-settings-menu .check {
     white-space: normal;
+}
+
+.board-settings-menu p {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+}
+
+.board-settings-menu .retake-tour {
+    display: block;
+    margin-top: 0.8rem;
+    width: 100%;
+}
+
+[data-theme="hacker"] .board-settings summary,
+[data-theme="hacker"] .board-settings-menu {
+    border-radius: 0;
+}
+
+/* First-time guide */
+.guide-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.guide-focus {
+    z-index: 85;
+    box-shadow: 0 0 0 4px var(--accent), 0 0 0 100vmax rgba(0, 0, 0, 0.5) !important;
+    animation: none !important;
+}
+
+.guide {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 90;
+    transform: translateX(-50%);
+    width: min(92vw, 440px);
+    padding: 1.1rem 1.2rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+}
+
+.guide h3 {
+    margin: 0.6rem 0 0.4rem;
+    font-size: 1.15rem;
+}
+
+.guide p {
+    margin: 0 0 1rem;
+    line-height: 1.5;
+}
+
+.guide-progress {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.guide-progress span {
+    width: 1.4rem;
+    height: 0.3rem;
+    border-radius: 999px;
+    background: var(--border);
+}
+
+.guide-progress span.done {
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.guide-progress span.on {
+    background: var(--accent);
+}
+
+.guide-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.guide-skip {
+    border: none;
+    color: var(--muted);
+}
+
+[data-theme="hacker"] .guide,
+[data-theme="hacker"] .guide-progress span {
+    border-radius: 0;
+}
+
+@media (max-width: 760px) {
+    .guide {
+        bottom: 0.75rem;
+    }
 }
 
 .speaker-mood {
@@ -1382,7 +1632,10 @@ input[type="checkbox"] {
 }
 
 @keyframes glitch {
-    0%, 40%, 100% {
+
+    0%,
+    40%,
+    100% {
         transform: none;
     }
 

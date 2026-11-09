@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Deadlines } from "./Deadlines";
 import { EggTimer } from "./EggTimer";
+import { Guide } from "./Guide";
 import { KeyBar, type HotKey } from "./KeyBar";
 import { Kitten } from "./Kitten";
 import { ParkingLot } from "./ParkingLot";
 import { People } from "./People";
+import { StatusBox } from "./StatusBox";
 import { usePrefs } from "./prefs";
 import { Shell, type Command } from "./Shell";
 import {
@@ -19,6 +21,7 @@ import {
     onlineCandidates,
     resetTimer,
     setDoing,
+    setStatusEnabled,
     stamp,
     startRound,
     toggleMood,
@@ -30,6 +33,7 @@ import { useRoom } from "./useRoom";
 import { relayConfigured } from "./relay";
 
 const SESSION_MS = 60 * 60 * 1000;
+const GUIDE_KEY = "standup-guide-done";
 
 export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave: () => void }) {
     const [sessionStart, setSessionStart] = useState(() => Date.now());
@@ -38,6 +42,22 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
     const { state, online, linked, update } = room;
     const { prefs, setPrefs, theme } = usePrefs();
     const [copied, setCopied] = useState(false);
+    const statusOn = state.settings.statusEnabled;
+    const [guideStep, setGuideStep] = useState<number | null>(() => (localStorage.getItem(GUIDE_KEY) ? null : 0));
+    const closeGuide = useCallback(() => {
+        localStorage.setItem(GUIDE_KEY, "1");
+        setGuideStep(null);
+    }, []);
+    const settingsRef = useRef<HTMLDetailsElement>(null);
+
+    useEffect(() => {
+        const onPointerDown = (e: PointerEvent) => {
+            const menu = settingsRef.current;
+            if (menu?.open && !menu.contains(e.target as Node)) menu.open = false;
+        };
+        document.addEventListener("pointerdown", onPointerDown);
+        return () => document.removeEventListener("pointerdown", onPointerDown);
+    }, []);
     const self = state.people[me.id];
     const needsRegister = !self || self.deleted || self.name !== me.name;
 
@@ -227,6 +247,25 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                 )}
                 <button onClick={copyLink}>{copied ? "copied!" : "copy link"}</button>
                 <button onClick={newStandup}>new standup</button>
+                <details className="board-settings" ref={settingsRef}>
+                    <summary>⚙️ board</summary>
+                    <div className="board-settings-menu">
+                        <label className="check">
+                            <input type="checkbox" checked={statusOn} onChange={(e) => update((s) => setStatusEnabled(s, e.target.checked))} />
+                            {theme.statusToggle}
+                        </label>
+                        <p className="muted">Applies to everyone on this board.</p>
+                        <button
+                            className="retake-tour"
+                            onClick={() => {
+                                if (settingsRef.current) settingsRef.current.open = false;
+                                setGuideStep(0);
+                            }}
+                        >
+                            🧭 Retake the tour
+                        </button>
+                    </div>
+                </details>
                 <span className="spacer" />
                 <span className="status">
                     <span className={linked ? "dot" : "dot off"} />
@@ -239,22 +278,28 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
                                 : `${online.size} online`}
                 </span>
                 <span>{me.name}</span>
-                <select value={prefs.theme} onChange={(e) => setPrefs({ ...prefs, theme: e.target.value as ThemeName })} title="Theme">
-                    {THEME_NAMES.map((n) => (
-                        <option key={n} value={n}>
-                            theme: {THEMES[n].name}
-                        </option>
-                    ))}
-                </select>
+                <label className="theme-picker">
+                    <select value={prefs.theme} onChange={(e) => setPrefs({ ...prefs, theme: e.target.value as ThemeName })} aria-label="Theme">
+                        {THEME_NAMES.map((n) => (
+                            <option key={n} value={n}>
+                                {THEMES[n].icon} {THEMES[n].name}
+                            </option>
+                        ))}
+                    </select>
+                </label>
                 {theme.terminal && <button onClick={toggleCrt}>crt: {prefs.crt ? "on" : "off"}</button>}
                 {!theme.terminal && <button onClick={onLeave}>leave</button>}
             </header>
-            <main className="grid">
+            <main className={statusOn ? "grid with-status" : "grid"}>
                 <EggTimer {...room} meId={me.id} />
                 <People {...room} meId={me.id} nudge={step === "mood"} />
+                {statusOn && <StatusBox {...room} meId={me.id} />}
                 <Deadlines {...room} meName={me.name} />
                 <ParkingLot {...room} meName={me.name} nudge={step === "topics"} onTopicsDone={markTopicsDone} />
             </main>
+            {guideStep !== null && (
+                <Guide step={guideStep} ltNeeded={theme.ltNeeded} statusOn={statusOn} onStep={setGuideStep} onClose={closeGuide} />
+            )}
             {theme.terminal && <KeyBar keys={hotKeys} onDigit={(n) => update((s) => toggleMood(s, me.id, n))} />}
             {prefs.theme === "kitten" && <Kitten timer={state.timer} />}
         </div>
