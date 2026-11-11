@@ -2073,6 +2073,269 @@ input[type="checkbox"] {
     }
 }
 
+/* ---------- Christmas theme ---------- */
+@keyframes snowfall {
+    to {
+        background-position: 0 400px;
+    }
+}
+
+@keyframes snowfall-big {
+    to {
+        background-position: 0 600px;
+    }
+}
+
+@keyframes twinkle {
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes candy {
+    to {
+        background-position: 22.6px 0;
+    }
+}
+
+@keyframes sleigh-fly {
+    0% {
+        transform: translateX(110vw) translateY(0);
+    }
+
+    10% {
+        transform: translateX(60vw) translateY(-14px);
+    }
+
+    20% {
+        transform: translateX(10vw) translateY(6px);
+    }
+
+    30%,
+    100% {
+        transform: translateX(-40vw) translateY(-6px);
+    }
+}
+
+[data-theme="christmas"] {
+    body {
+        background: radial-gradient(ellipse at top, #1d4560 0%, var(--bg) 60%) fixed, var(--bg);
+    }
+
+    /* Two layers of falling snow for a bit of depth */
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    body::before {
+        background-image:
+            radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%),
+            radial-gradient(2px 2px at 140px 90px, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
+            radial-gradient(3px 3px at 90px 160px, #fff 50%, transparent 51%),
+            radial-gradient(2px 2px at 220px 220px, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
+            radial-gradient(3px 3px at 300px 60px, #fff 50%, transparent 51%),
+            radial-gradient(2px 2px at 360px 300px, rgba(255, 255, 255, 0.85) 50%, transparent 51%);
+        background-size: 400px 400px;
+        animation: snowfall 16s linear infinite;
+    }
+
+    body::after {
+        background-image:
+            radial-gradient(4px 4px at 80px 120px, rgba(255, 255, 255, 0.95) 50%, transparent 51%),
+            radial-gradient(5px 5px at 380px 420px, #fff 50%, transparent 51%),
+            radial-gradient(4px 4px at 520px 220px, rgba(255, 255, 255, 0.9) 50%, transparent 51%);
+        background-size: 600px 600px;
+        animation: snowfall-big 26s linear infinite;
+    }
+
+    .app {
+        position: relative;
+        z-index: 1;
+        padding-top: 2.4rem;
+    }
+
+    /* String of twinkling lights along the top */
+    .app::before,
+    .app::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 26px;
+        z-index: 2;
+        pointer-events: none;
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.55));
+    }
+
+    .app::before {
+        background:
+            radial-gradient(circle at 12px 16px, #ff3b3b 0 5px, transparent 5.5px) 0 0 / 96px 26px repeat-x,
+            radial-gradient(circle at 60px 16px, #2ecc71 0 5px, transparent 5.5px) 0 0 / 96px 26px repeat-x,
+            linear-gradient(transparent 8px, #2b3a2f 8px, #2b3a2f 10px, transparent 10px);
+        animation: twinkle 1.6s ease-in-out infinite;
+    }
+
+    .app::after {
+        background:
+            radial-gradient(circle at 36px 16px, #ffd23f 0 5px, transparent 5.5px) 0 0 / 96px 26px repeat-x,
+            radial-gradient(circle at 84px 16px, #4fc3ff 0 5px, transparent 5.5px) 0 0 / 96px 26px repeat-x;
+        animation: twinkle 1.6s ease-in-out infinite 0.8s;
+    }
+
+    /* Header sits on the night sky */
+    header.top {
+        color: #f6efe3;
+    }
+
+    header.top h1 {
+        color: #fff;
+        text-shadow: 0 0 14px rgba(255, 215, 120, 0.5);
+    }
+
+    header.top .room-id,
+    header.top .status {
+        color: #bcd6e6;
+    }
+
+    header.top > button,
+    .board-settings summary {
+        color: #f6efe3;
+        border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .board-settings-menu {
+        color: var(--text);
+    }
+
+    .board-settings-menu button {
+        color: var(--text);
+        border-color: var(--border);
+    }
+
+    /* Cards with a layer of snow on top */
+    .card {
+        margin-top: 12px;
+        padding-top: 1.7rem;
+        border: 2px solid #e8d4bd;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -3px;
+        right: -3px;
+        height: 26px;
+        pointer-events: none;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 28' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M0 14C0 5 6 2 16 2H384C394 2 400 5 400 14V16Q396 21 390 17Q384 23 376 17Q368 19 360 16Q352 25 342 17Q334 20 326 16Q318 22 310 17Q300 26 290 17Q282 20 274 16Q266 23 256 17Q248 19 240 16Q230 27 220 17Q212 20 204 16Q196 23 186 17Q178 19 170 16Q160 26 150 17Q142 20 134 16Q126 23 116 17Q108 19 100 16Q90 27 80 17Q72 20 64 16Q56 23 46 17Q38 19 30 16Q20 25 12 17Q4 20 0 16Z'/%3E%3C/defs%3E%3Cuse href='%23s' fill='%23dbe6ef' transform='translate(0 1.5)'/%3E%3Cuse href='%23s' fill='%23ffffff'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+        filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+        background: #fff;
+        color: var(--text);
+        border-color: var(--border);
+    }
+
+    .card h2 {
+        color: var(--red);
+        font-size: 1.1rem;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    button {
+        border-radius: 999px;
+    }
+
+    button.primary {
+        background: linear-gradient(180deg, #e0263f, #a50c22);
+        border-color: #d4a017;
+        box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.3);
+    }
+
+    /* Candy-cane progress bar with Santa's sleigh riding it */
+    .clock .progress {
+        height: 14px;
+        background: #f1e6da;
+    }
+
+    .clock .progress>div {
+        background: repeating-linear-gradient(45deg, #c8102e 0 8px, #fff 8px 16px);
+        background-size: 22.6px 22.6px;
+        animation: candy 0.9s linear infinite;
+    }
+
+    .clock:is(.calm, .warm) .time {
+        color: var(--lt);
+    }
+
+    .my-turn {
+        border: 2px solid #d4a017;
+        background: #fff7e0;
+    }
+
+    .prompts li.current {
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .badge {
+        background: var(--lt);
+        color: #fff;
+    }
+
+    .queue li.current {
+        background: var(--lt);
+        border-color: var(--lt);
+    }
+}
+
+.sleigh {
+    position: fixed;
+    top: 9vh;
+    left: 0;
+    z-index: 55;
+    font-size: 2.2rem;
+    white-space: nowrap;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+    animation: sleigh-fly 40s linear 4s infinite both;
+}
+
+.sleigh-shout {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: #fff;
+    color: #c8102e;
+    font: 700 0.95rem Georgia, serif;
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-theme="christmas"] body::before,
+    [data-theme="christmas"] body::after,
+    [data-theme="christmas"] .app::before,
+    [data-theme="christmas"] .app::after,
+    [data-theme="christmas"] .clock .progress>div {
+        animation: none !important;
+    }
+}
+
 /* Roaming kitten */
 [data-theme="kitten"] .app {
     padding-bottom: 4rem;

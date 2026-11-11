@@ -115,6 +115,23 @@
     --runner: "🎸";
 }
 
+:root[data-theme="christmas"] {
+    font-family: "Georgia", "Iowan Old Style", serif;
+    color-scheme: light;
+    --bg: #0c2233;
+    --card: #fffdf8;
+    --text: #2a1d17;
+    --muted: #7a6a5f;
+    --dim: #c9bfb5;
+    --border: #ecd9c4;
+    --accent: #c8102e;
+    --on-accent: #fff;
+    --amber: #c58a00;
+    --red: #c8102e;
+    --lt: #1f7a3d;
+    --runner: "🛷";
+}
+
 * {
     box-sizing: border-box;
 }

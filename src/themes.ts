@@ -1,4 +1,4 @@
-export type ThemeName = "hacker" | "default" | "unicorn" | "kitten" | "raid" | "rock";
+export type ThemeName = "hacker" | "default" | "unicorn" | "kitten" | "raid" | "rock" | "christmas";
 
 export type Theme = {
     name: string;
@@ -291,6 +291,47 @@ export const THEMES: Record<ThemeName, Theme> = {
         topicCovered: "🤘 Nailed it",
         allCovered: "🔥 Encore-worthy!",
         prompts: ["🎚️ Vibe check?", "🧯 Blockers?", "🌟 Headliners?"],
+    },
+    christmas: {
+        name: "christmas",
+        icon: "🎄",
+        terminal: false,
+        title: "🎄 Standup",
+        moods: ["🥶", "☃️", "🎄", "🎁", "🎅"],
+        timer: "🔔 Sleigh timer",
+        team: "🎅 Santa's elves",
+        parking: "🎁 Gift pile / AOB",
+        start: "🎄 Let it snow!",
+        restart: "Once more, with feeling",
+        wrap: "🎁 That's a wrap!",
+        overtime: "🔔 Jingle all the way… over time!",
+        live: "🎤 caroling",
+        moodPrompt: "How festive are you feeling?",
+        empty: "No gifts under the tree yet.",
+        placeholder: "Something to unwrap after standup…",
+        login: "🎄 Standup",
+        user: "Elf name",
+        room: "Workshop",
+        joinHint: "Every elf in the same workshop joins the same standup.",
+        nudgeMood: "🎄 Step 1 of 2: how festive are you?",
+        nudgeTopics: "🎁 Step 2 of 2: anything for the gift pile?",
+        nudgeSkip: "nothing from me, ho ho ho",
+        sessionEnded: "🌙 Silent night: disconnected",
+        hurry: "🔔 Sleigh bells are ringing, wrap it up!",
+        deadlines: "📅 Advent calendar",
+        deadlinesEmpty: "No doors to open yet.",
+        deadlinePlaceholder: "What's due before the holidays?",
+        lt: "Santa",
+        ltNeeded: "Santa needed",
+        statusToggle: "🛠️ Show what every elf is making",
+        statusPlaceholder: "What are you making in the workshop?",
+        statusTitle: "🛠️ In the workshop today",
+        statusEmpty: "The workshop is quiet… for now.",
+        yourTurn: "🎄 Your turn, elf!",
+        turnDone: "Pass the present →",
+        topicCovered: "🎁 Unwrapped",
+        allCovered: "🎅 Ho ho ho, all done!",
+        prompts: ["☃️ Mood?", "🧊 Frozen (blockers)?", "🌟 Star of the week?"],
     },
 };
 

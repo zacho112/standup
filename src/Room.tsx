@@ -9,6 +9,7 @@ import { People } from "./People";
 import { StatusBox } from "./StatusBox";
 import { usePrefs } from "./prefs";
 import { Shell, type Command } from "./Shell";
+import { Sleigh } from "./Sleigh";
 import {
     addDeadline,
     addTopic,
@@ -315,6 +316,7 @@ export function Room({ roomId, me, onLeave }: { roomId: string; me: Me; onLeave:
             )}
             {theme.terminal && <KeyBar keys={hotKeys} onDigit={(n) => update((s) => toggleMood(s, me.id, n))} />}
             {prefs.theme === "kitten" && <Kitten timer={state.timer} />}
+            {prefs.theme === "christmas" && <Sleigh />}
         </div>
     );
 }

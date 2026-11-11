@@ -41,8 +41,30 @@ function ding() {
     osc.stop(ctx.currentTime + 1.2);
 }
 
+// "Jingle bells, jingle bells, jingle all the way" on a bell-ish triangle wave.
+function jingle() {
+    const ctx = new AudioContext();
+    const notes = [659, 659, 659, 0, 659, 659, 659, 0, 659, 784, 523, 587, 659];
+    const step = 0.17;
+    notes.forEach((freq, i) => {
+        if (!freq) return;
+        const t = ctx.currentTime + i * step;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + step * 1.6);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + step * 1.6);
+    });
+    setTimeout(() => void ctx.close(), (notes.length * step + 1) * 1000);
+}
+
 export function EggTimer({ state, online, update, meId }: RoomApi & { meId: string }) {
-    const { theme } = usePrefs();
+    const { theme, prefs } = usePrefs();
+    const festive = prefs.theme === "christmas";
     const t = state.timer;
     const running = t.startedAt !== null;
     const now = useNow(running);
@@ -54,9 +76,9 @@ export function EggTimer({ state, online, update, meId }: RoomApi & { meId: stri
     const wasOvertime = useRef(overtime);
 
     useEffect(() => {
-        if (overtime && !wasOvertime.current && running) ding();
+        if (overtime && !wasOvertime.current && running) (festive ? jingle : ding)();
         wasOvertime.current = overtime;
-    }, [overtime, running]);
+    }, [overtime, running, festive]);
 
     const name = (id: string) => state.people[id]?.name ?? "Someone";
     const candidates = onlineCandidates(state, online);
